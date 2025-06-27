@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import java.lang.String?>
 
-<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.appointment.AppointmentController">
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.AppointmentController">
    <children>
       <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #b3e0f2; -fx-padding: 10;">
          <children>

@@ -1,4 +1,4 @@
-package com.appointment;
+package com.medisys;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

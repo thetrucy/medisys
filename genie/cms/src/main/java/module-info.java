@@ -1,7 +1,7 @@
-module com.appointment {
+module com.medisys {
     requires javafx.controls;
     requires javafx.fxml;
     
-    opens com.appointment to javafx.fxml;
-    exports com.appointment;
+    opens com.medisys to javafx.fxml;
+    exports com.medisys;
 }

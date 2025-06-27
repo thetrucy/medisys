@@ -1,4 +1,4 @@
-package com.appointment;
+package com.medisys;
 
 import java.util.ArrayList;
 import java.util.List;

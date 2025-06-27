@@ -1,4 +1,4 @@
-package com.appointment;
+package com.medisys;
 
 public class Patient {
     private String patientName;

@@ -1,4 +1,4 @@
-package com.appointment;
+package com.medisys;
 
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;

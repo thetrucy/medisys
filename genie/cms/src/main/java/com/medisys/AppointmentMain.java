@@ -1,4 +1,4 @@
-package com.appointment;
+package com.medisys;
 
 import java.time.LocalTime;
 import java.time.LocalDate;
