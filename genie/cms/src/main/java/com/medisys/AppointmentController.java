@@ -16,9 +16,6 @@ import java.util.ResourceBundle;
 public class AppointmentController implements Initializable {
     ScheduleMaker Appointments;
 
-    //doctor info
-    @FXML private Label doctorLabel;
-
     //radio buttons and toggle group
     @FXML private RadioButton radioSelf;
     @FXML private RadioButton radioOther;
@@ -56,6 +53,7 @@ public class AppointmentController implements Initializable {
         
         //default form
         showSelfBookingForm();
+        Appointments = new ScheduleMaker();
     }
 
     private void initializeTimeSlots() {
@@ -70,10 +68,6 @@ public class AppointmentController implements Initializable {
         appointmentTimeOther.setItems(FXCollections.observableArrayList(timeSlots));
     }
 
-    public void setDoctorInfo(String doctorName, String doctorSpecialty) {
-        doctorLabel.setText(doctorName);
-        doctorLabel.setText('\n' + doctorSpecialty);
-    }
 
     @FXML
     private void onRadioChange(ActionEvent event) {
@@ -114,7 +108,7 @@ public class AppointmentController implements Initializable {
             LocalDateTime appointmentDateTime = appointmentDate.atTime(LocalTime.parse(appointmentTime));
 
             //make new appointment
-            AppointmentMain appointment = new AppointmentMain(doctorLabel.getText(), appointmentDateTime, patient);
+            AppointmentMain appointment = new AppointmentMain("TestDoctorName", appointmentDateTime, patient);
             
             //process the appointment, check and add to list
             if (Appointments.addAppointment(appointment)) {
@@ -151,7 +145,7 @@ public class AppointmentController implements Initializable {
             LocalDateTime appointmentDateTime = appointmentDate.atTime(LocalTime.parse(appointmentTime));
 
             //make new appointment
-            AppointmentMain appointment = new AppointmentMain(doctorLabel.getText(), appointmentDateTime, patient);
+            AppointmentMain appointment = new AppointmentMain("TestDoctorName", appointmentDateTime, patient);
             
             //process the appointment, check and add to list
             if (Appointments.addAppointment(appointment)) {

@@ -19,11 +19,7 @@
 <VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.AppointmentController">
    <children>
       <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #b3e0f2; -fx-padding: 10;">
-         <children>
-            <Label fx:id="doctorLabel" />
-            <Region HBox.hgrow="ALWAYS" />
-            <Hyperlink text="Đổi bác sĩ" />
-         </children>
+      
       </HBox>
       <VBox spacing="20.0" style="-fx-padding: 20;">
          <children>

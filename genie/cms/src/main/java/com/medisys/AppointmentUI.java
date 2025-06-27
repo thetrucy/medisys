@@ -6,7 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
 
-public class AppointmentUIMain extends Application {
+public class AppointmentUI extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
