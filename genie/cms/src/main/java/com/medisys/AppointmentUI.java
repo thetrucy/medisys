@@ -20,7 +20,7 @@ public class AppointmentUI extends Application {
         
         //cái này copy từ bên cms qua :)))
         Scene scene = new Scene(root, 600, 400);
-        stage.setTitle("My JavaFX App");
+        stage.setTitle("Appointment Booking");
         stage.setScene(scene);
         stage.show();
     }

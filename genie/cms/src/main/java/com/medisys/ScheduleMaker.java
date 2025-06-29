@@ -27,7 +27,7 @@ public class ScheduleMaker {
         }
         else {
             for (AppointmentMain tempAppointment : appointments) {
-                if (tempAppointment.getTime() == appointment.getTime()) {
+                if (tempAppointment.getTime().equals(appointment.getTime())) {
                     //print information of occupied appointment
                     //here if it's even needed
                     return false;
