@@ -1,0 +1,587 @@
+package com.medisys.util;
+
+
+import com.medisys.model.Appointment;
+import com.medisys.model.Patient;
+import com.medisys.model.Doctor;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DatabaseManager {
+
+    private static final String DATABASE_URL = "jdbc:sqlite:medical_cms.db"; // Local database file
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * Establishes a connection to the SQLite database.
+     * @return A Connection object.
+     */
+    private Connection connect() {
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(DATABASE_URL);
+        } catch (SQLException e) {
+            System.err.println("Error connecting to database: " + e.getMessage());
+        }
+        return conn;
+    }
+
+    /**
+     * Creates the patients and appointments tables if they don't exist.
+     */
+    public void createTables() {
+        String createPatientsTableSQL = """
+            CREATE TABLE IF NOT EXISTS patients (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                phone TEXT NOT NULL UNIQUE,
+                dob TEXT
+            );
+            """;
+
+        String createDoctorsTableSQL = """
+            CREATE TABLE IF NOT EXISTS doctors (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                faculty TEXT NOT NULL,
+                phone TEXT NOT NULL UNIQUE,
+                email TEXT UNIQUE,
+                room TEXT
+            );
+            """;
+
+        String createAppointmentsTableSQL = """
+            CREATE TABLE IF NOT EXISTS appointments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                patient_id INTEGER NOT NULL,
+                doctor_id INTEGER NOT NULL,
+                field TEXT NOT NULL,
+                appointment_time TEXT NOT NULL,
+                doctor_name_at_booking TEXT NOT NULL,
+                room TEXT NOT NULL,
+                FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+                FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE RESTRICT
+            );
+            """;
+
+        try (Connection conn = connect();
+             Statement stmt = conn.createStatement()) {
+            // Create tables
+            stmt.execute(createPatientsTableSQL);
+            stmt.execute(createDoctorsTableSQL);
+            stmt.execute(createAppointmentsTableSQL);
+            System.out.println("Tables created successfully or already exist.");
+
+            // Check if doctors table is empty and pre-populate
+            if (isTableEmpty("doctors", conn)) {
+                System.out.println("Doctors table is empty. Populating with initial data...");
+                populateInitialDoctors(conn);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error creating tables or populating initial data: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if a given table is empty.
+     * @param tableName The name of the table to check.
+     * @param conn The database connection.
+     * @return true if the table is empty, false otherwise.
+     * @throws SQLException if a database access error occurs.
+     */
+    private boolean isTableEmpty(String tableName, Connection conn) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM " + tableName;
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1) == 0;
+            }
+        }
+        return true; // Should not happen if table exists, but as a fallback
+    }
+        /**
+     * Populates the doctors table with initial data.
+     * This method is called only if the doctors table is empty.
+     * @param conn The database connection.
+     */
+ private void populateInitialDoctors(Connection conn) {
+        List<Doctor> initialDoctors = new ArrayList<>();
+        // Use your Doctor constructor: (name, faculty, phone, email)
+        initialDoctors.add(new Doctor("Dr. John Smith", "General Practice", "0901234567", "john.smith@medisys.com", "Room 1"));
+        initialDoctors.add(new Doctor("Dr. Jane Doe", "Pediatrics", "0907654321", "jane.doe@medisys.com", "Room 2"));
+        initialDoctors.add(new Doctor("Dr. Robert Johnson", "Cardiology", "0912345678", "robert.j@medisys.com", "Room 3"));
+        initialDoctors.add(new Doctor("Dr. Mary Lee", "Dermatology", "0918765432", "mary.l@medisys.com", "Room 4"));
+        initialDoctors.add(new Doctor("Dr. David Kim", "Orthopedics", "0923456789", "david.k@medisys.com", "Room 5"));
+        initialDoctors.add(new Doctor("Dr. Sarah Chen", "Internal Medicine", "0929876543", "sarah.c@medisys.com", "Room 6"));
+
+        // SQL should use 'faculty' as the column name in the DB
+        String sql = "INSERT INTO doctors(name, faculty, phone, email, room) VALUES(?,?,?,?,?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(false);
+
+            for (Doctor doctor : initialDoctors) {
+                pstmt.setString(1, doctor.getName());
+                pstmt.setString(2, doctor.getFaculty()); 
+                pstmt.setString(3, doctor.getPhone());
+                pstmt.setString(4, doctor.getEmail());
+                pstmt.setString(5, doctor.getRoom());
+                pstmt.addBatch();
+            }
+            pstmt.executeBatch();
+            conn.commit();
+            System.out.println("Initial doctors populated successfully.");
+        } catch (SQLException e) {
+            System.err.println("Error populating initial doctors: " + e.getMessage());
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException rb_e) {
+                System.err.println("Rollback failed: " + rb_e.getMessage());
+            }
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                System.err.println("Error resetting auto-commit: " + e.getMessage());
+            }
+        }
+    }
+    public int addDoctor(Doctor doctor) {
+        String sql = "INSERT INTO doctors(name, faculty, phone, email, room) VALUES(?,?,?,?,?)";
+        int doctorId = -1;
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, doctor.getName());
+            pstmt.setString(2, doctor.getFaculty());
+            pstmt.setString(3, doctor.getPhone());
+            pstmt.setString(4, doctor.getEmail());
+            pstmt.setString(5, doctor.getRoom());
+            pstmt.executeUpdate();
+
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                doctorId = rs.getInt(1);
+                System.out.println("Doctor added with ID: " + doctorId);
+            }
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE constraint failed")) {
+                System.err.println("Error: A doctor with this phone or email already exists.");
+            } else {
+                System.err.println("Error adding doctor: " + e.getMessage());
+            }
+        }
+        return doctorId;
+    }
+    public List<Doctor> getAllDoctors() {
+        List<Doctor> doctors = new ArrayList<>();
+        String sql = "SELECT id, name, faculty, phone, email, room FROM doctors";
+        try (Connection conn = connect();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                doctors.add(new Doctor(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("faculty"),
+                    rs.getString("phone"),
+                    rs.getString("email"),
+                    rs.getString("room")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving doctors: " + e.getMessage());
+        }
+        return doctors;
+    }
+      
+    public Doctor getDoctorById(int doctorId) {
+        String sql = "SELECT id, name, faculty, phone, email, room FROM doctors WHERE id = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, doctorId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return new Doctor(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("faculty"),
+                    rs.getString("phone"),
+                    rs.getString("email"),
+                    rs.getString("room")
+                );
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving doctor by ID " + doctorId + ": " + e.getMessage());
+        }
+        return null;
+    }
+    public boolean updateDoctor(Doctor doctor) {
+        String sql = "UPDATE doctors SET name = ?, faculty = ?, phone = ?, email = ?, room = ? WHERE id = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, doctor.getName());
+            pstmt.setString(2, doctor.getFaculty());
+            pstmt.setString(3, doctor.getPhone());
+            pstmt.setString(4, doctor.getEmail());
+            pstmt.setString(5, doctor.getRoom());
+            pstmt.setInt(6, doctor.getId());
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Doctor ID " + doctor.getId() + " updated successfully.");
+                return true;
+            } else {
+                System.out.println("No doctor found with ID: " + doctor.getId() + " to update.");
+                return false;
+            }
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE constraint failed")) {
+                System.err.println("Error: Cannot update. Another doctor already has this phone or email.");
+            } else {
+                System.err.println("Error updating doctor: " + e.getMessage());
+            }
+            return false;
+        }
+    }
+    public boolean deleteDoctor(int doctorId) {
+        String sql = "DELETE FROM doctors WHERE id = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, doctorId);
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Doctor ID " + doctorId + " deleted successfully.");
+                return true;
+            } else {
+                System.out.println("No doctor found with ID: " + doctorId + " to delete.");
+                return false;
+            }
+        } catch (SQLException e) {
+            if (e.getMessage().contains("FOREIGN KEY constraint failed")) {
+                System.err.println("Error: Cannot delete doctor ID " + doctorId + " because there are appointments associated with this doctor. Please reassign or delete their appointments first.");
+            } else {
+                System.err.println("Error deleting doctor: " + e.getMessage());
+            }
+            return false;
+        }
+    }
+    public int addPatient(Patient patient) {
+        String sql = "INSERT INTO patients(name, phone, dob) VALUES(?,?,?)";
+        int patientId = -1;
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, patient.getName());
+            pstmt.setString(2, patient.getPhone());
+            pstmt.setString(3, patient.getDOB());
+            pstmt.executeUpdate();
+
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                patientId = rs.getInt(1);
+                System.out.println("Patient added with ID: " + patientId);
+            }
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE constraint failed: patients.phone")) {
+                System.err.println("Error: A patient with this phone number already exists.");
+            } else {
+                System.err.println("Error adding patient: " + e.getMessage());
+            }
+        }
+        return patientId;
+    }
+
+    /**
+     * Adds a new appointment to the database.
+     * @param appointment The Appointment object to add.
+     * @return The generated ID of the new appointment, or -1 if insertion failed.
+     */
+    public int addAppointment(int patientId, int doctorId, String field, LocalDateTime appointmentTime, String doctorNameAtBooking, String room) { // MODIFIED SIGNATURE
+        String sql = "INSERT INTO appointments(patient_id, doctor_id, field, appointment_time, doctor_name_at_booking, room) VALUES(?,?,?,?,?,?)"; // MODIFIED SQL
+        int appointmentId = -1;
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setInt(1, patientId);
+            pstmt.setInt(2, doctorId); 
+            pstmt.setString(3, field);
+            pstmt.setString(4, appointmentTime.format(DATE_TIME_FORMATTER));
+            pstmt.setString(5, doctorNameAtBooking);
+            pstmt.setString(6, room);
+            pstmt.executeUpdate();
+
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                appointmentId = rs.getInt(1);
+                System.out.println("Appointment added with ID: " + appointmentId);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error adding appointment: " + e.getMessage());
+        }
+        return appointmentId;
+    }
+
+    public boolean deleteAppointment(int appointmentId) {
+        String sql = "DELETE FROM appointments WHERE id = ?";
+        try (Connection conn = connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, appointmentId);
+            int rowsAffected = pstmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                System.out.println("Appointment with ID " + appointmentId + " deleted successfully");
+                return true;
+            } else {
+                System.out.println("No appointment found with ID: " + appointmentId);
+                return false;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error deleting appointment: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Retrieves all patients from the database.
+     * @return A list of Patient objects.
+     */
+    public List<Patient> getAllPatients() {
+        List<Patient> patients = new ArrayList<>();
+        String sql = "SELECT id, name, phone, dob FROM patients";
+        try (Connection conn = connect();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                patients.add(new Patient(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("phone"),
+                    rs.getString("dob")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving patients: " + e.getMessage());
+        }
+        return patients;
+    }
+
+    /**
+     * Retrieves all appointments from the database, including patient name.
+     * @return A list of Appointment objects.
+     */
+    public List<Appointment> getAllAppointments() {
+        List<Appointment> appointments = new ArrayList<>();
+        String sql = """
+            SELECT
+                a.id,
+                a.patient_id,
+                p.name AS patient_name,
+                a.doctor_id,        -- ADDED
+                d.name AS doctor_name, -- ADDED
+                a.field,
+                a.appointment_time,
+                a.doctor_name_at_booking, -- ADDED
+                a.room
+            FROM
+                appointments a
+            JOIN
+                patients p ON a.patient_id = p.id
+            JOIN
+                doctors d ON a.doctor_id = d.id -- JOIN WITH DOCTORS TABLE
+            ORDER BY
+                a.appointment_time
+            """;
+        try (Connection conn = connect();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                LocalDateTime time = LocalDateTime.parse(rs.getString("appointment_time"), DATE_TIME_FORMATTER);
+                appointments.add(new Appointment(
+                    rs.getInt("id"),
+                    rs.getInt("patient_id"),
+                    rs.getString("field"),
+                    time,
+                    rs.getString("doctor_name"), // Display current doctor's name from DB
+                    rs.getString("room"),
+                    rs.getString("patient_name")
+                    // Note: If your Appointment model had a doctorId field, you'd retrieve it here:
+                    //rs.getInt("doctor_id")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving appointments: " + e.getMessage());
+        }
+        return appointments;
+    }
+    /**
+     * Retrieves appointments for a specific patient ID.
+     * @param patientId The ID of the patient.
+     * @return A list of Appointment objects for the given patient.
+     */
+    public List<Appointment> getAppointmentsByPatient(int patientId) {
+        List<Appointment> appointments = new ArrayList<>();
+        String sql = """
+            SELECT
+                a.id,
+                a.patient_id,
+                p.name AS patient_name,
+                a.doctor_id,
+                d.name AS doctor_name,
+                a.field,
+                a.appointment_time,
+                a.doctor_name_at_booking,
+                a.room
+            FROM
+                appointments a
+            JOIN
+                patients p ON a.patient_id = p.id
+            JOIN
+                doctors d ON a.doctor_id = d.id
+            WHERE
+                a.patient_id = ?
+            ORDER BY
+                a.appointment_time
+            """;
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, patientId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                LocalDateTime time = LocalDateTime.parse(rs.getString("appointment_time"), DATE_TIME_FORMATTER);
+                appointments.add(new Appointment(
+                    rs.getInt("id"),
+                    rs.getInt("patient_id"),
+                    rs.getString("field"),
+                    time,
+                    rs.getString("doctor_name"), // Display current doctor's name from DB
+                    rs.getString("room"),
+                    rs.getString("patient_name")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving appointments for patient ID " + patientId + ": " + e.getMessage());
+        }
+        return appointments;
+    }
+
+    /**
+     * Retrieves appointments for a specific doctor ID.
+     * @param doctorId The ID of the doctor.
+     * @return A list of Appointment objects for the given doctor.
+     */
+    public List<Appointment> getAppointmentsByDoctor(int doctorId) { // NEW METHOD
+        List<Appointment> appointments = new ArrayList<>();
+        String sql = """
+            SELECT
+                a.id,
+                a.patient_id,
+                p.name AS patient_name,
+                a.doctor_id,
+                d.name AS doctor_name,
+                a.field,
+                a.appointment_time,
+                a.doctor_name_at_booking,
+                a.room
+            FROM
+                appointments a
+            JOIN
+                patients p ON a.patient_id = p.id
+            JOIN
+                doctors d ON a.doctor_id = d.id
+            WHERE
+                a.doctor_id = ?
+            ORDER BY
+                a.appointment_time
+            """;
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, doctorId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                LocalDateTime time = LocalDateTime.parse(rs.getString("appointment_time"), DATE_TIME_FORMATTER);
+                appointments.add(new Appointment(
+                    rs.getInt("id"),
+                    rs.getInt("patient_id"),
+                    rs.getString("field"),
+                    time,
+                    rs.getString("doctor_name"),
+                    rs.getString("room"),
+                    rs.getString("patient_name")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving appointments for doctor ID " + doctorId + ": " + e.getMessage());
+        }
+        return appointments;
+    }
+    /**
+     * Updates an existing patient's information.
+     * @param patient The Patient object with updated information (ID must match an existing patient).
+     * @return True if update was successful, false otherwise.
+     */
+    public boolean updatePatient(Patient patient) {
+        String sql = "UPDATE patients SET name = ?, phone = ?, dob = ? WHERE id = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, patient.getName());
+            pstmt.setString(2, patient.getPhone());
+            pstmt.setString(3, patient.getDOB());
+            pstmt.setInt(4, patient.getId());
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Patient ID " + patient.getId() + " updated successfully.");
+                return true;
+            } else {
+                System.out.println("No patient found with ID: " + patient.getId() + " to update.");
+                return false;
+            }
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE constraint failed: patients.phone")) {
+                System.err.println("Error: Cannot update. Another patient already has this phone number.");
+            } else {
+                System.err.println("Error updating patient: " + e.getMessage());
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Deletes a patient and all their associated appointments.
+     * @param patientId The ID of the patient to delete.
+     * @return True if deletion was successful, false otherwise.
+     */
+    public boolean deletePatient(int patientId) {
+        String sql = "DELETE FROM patients WHERE id = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, patientId);
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Patient ID " + patientId + " and associated appointments deleted successfully.");
+                return true;
+            } else {
+                System.out.println("No patient found with ID: " + patientId + " to delete.");
+                return false;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error deleting patient: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @SuppressWarnings("exports")
+	public static Connection getConnection() {
+        try {
+            return DriverManager.getConnection(DATABASE_URL);
+        } catch (SQLException e) {
+            System.err.println("Error getting connection: " + e.getMessage());
+            return null;
+        }
+    }
+
+}
+
