@@ -30,6 +30,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
+import com.medisys.Main;
 
 public class AppointmentOne_1_Ctrler {
 	private Stage stage;
@@ -67,6 +68,10 @@ public class AppointmentOne_1_Ctrler {
 
     private ObservableList<Doctor> masterData = FXCollections.observableArrayList();
     private DatabaseManager dbManager;
+
+    @FXML private Button homeButton;
+    @FXML private Button appointmentsButton;
+    @FXML private Button profileButton;
 
     public AppointmentOne_1_Ctrler() {
         // Constructor, leave empty for FXML injection.
@@ -216,5 +221,32 @@ public class AppointmentOne_1_Ctrler {
         st.setAutoReverse(true);
         st.setCycleCount(2);
         st.play();
+    }
+
+    @FXML
+    private void onHomeButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("AppointmentOne_1");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onAppointmentsButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("Appointment"); // or "AppointmentBooking" if that's your FXML name
+       } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onProfileButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("PatientProfile");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

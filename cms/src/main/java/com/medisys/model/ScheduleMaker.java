@@ -10,7 +10,7 @@ public class ScheduleMaker {
     //construct a list to store appointments
     public ScheduleMaker() {
         this.appointments = new ArrayList<>();
-        this.dbManager =DatabaseManager.getInstance();
+        this.dbManager = DatabaseManager.getInstance();
         this.appointments = dbManager.getAllAppointments();
     }
 

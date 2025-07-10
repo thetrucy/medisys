@@ -26,12 +26,14 @@ public class Main extends Application {
         // --- End Database Initialization ---
 
         scene = new Scene(loadFXML("view/AppointmentOne_1"));
+        //scene = new Scene(loadFXML("view/PatientProfile"));
+        //scene = new Scene(loadFXML("view/UpcomingApm"));
         stage.setScene(scene);
         stage.setTitle("MediSys CMS"); // Optional: good practice to set a title
         stage.show();
     }
 
-    static void setRoot(String fxml) throws IOException {
+    public static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML("view/" + fxml));
     }
 

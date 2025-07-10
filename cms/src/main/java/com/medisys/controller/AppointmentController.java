@@ -33,6 +33,7 @@ import com.medisys.util.DatabaseManager;
 public class AppointmentController implements Initializable {
     ScheduleMaker Appointments;
     private Doctor selectedDoctor;
+    private DatabaseManager dbManager;
    // DatabaseManager appointedDoctors;
     static Integer appointmentID = 0;
 
@@ -91,6 +92,7 @@ public class AppointmentController implements Initializable {
         });
 
         setupTimeSlotSelectionHandlers();
+        this.dbManager = DatabaseManager.getInstance();
     }
 
     // Add the enum for blur types
@@ -124,11 +126,21 @@ public class AppointmentController implements Initializable {
     private boolean saveAppointmentToDatabase(Appointment appointment) {
         try {
             System.out.println("Attempting to save appointment: " + appointment);
-            boolean result = Appointments.addAppointment(appointment);
-            if (!result) {
+            int appointmentId = dbManager.addAppointment(
+            appointment.getPatientId(),           
+            appointment.getDoctorID(),            
+            appointment.getField(),               
+            appointment.getAppointmentTime(),     
+            appointment.getDoctor(),              
+            appointment.getRoom()                 
+        );
+            if (appointmentId > 0) {
+                appointment.setID(appointmentId);
+                return true;
+            } else {
                 System.err.println("Failed to save appointment (returned false)");
+                return false;
             }
-            return result;
         } catch (Exception e) {
             System.err.println("Database error saving appointment:");
             e.printStackTrace();
@@ -389,7 +401,7 @@ public class AppointmentController implements Initializable {
                     );
 
                     // database funny funny
-                    boolean addedSuccessfully = Appointments.addAppointment(appointment);
+                    boolean addedSuccessfully = saveAppointmentToDatabase(appointment);
 
                     if (addedSuccessfully) {
                         showSuccessAlert("Đặt lịch thành công!",
@@ -464,7 +476,7 @@ public class AppointmentController implements Initializable {
                 );
 
                 // Single save attempt (remove the redundant saveToDatabase call)
-                boolean addedSuccessfully = Appointments.addAppointment(appointment);
+                boolean addedSuccessfully = saveAppointmentToDatabase(appointment);
                 
                 if (addedSuccessfully) {
                     showSuccessAlert("Đặt lịch thành công!",
