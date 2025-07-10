@@ -6,7 +6,10 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -16,113 +19,148 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<VBox alignment="TOP_LEFT" prefHeight="385.0" prefWidth="463.0" spacing="20.0" style="-fx-background-color: #7db4e8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.PatientProfileController">
-   <padding>
-      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-   </padding>
-   <children>
-      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Hồ sơ người dùng">
-         <font>
-            <Font name="System Bold" size="24.0" />
-         </font>
-      </Text>
-      <VBox style="-fx-background-color: #ebf4fc;">
-         <children>
-            <AnchorPane prefHeight="20.0" prefWidth="423.0" />
-            <GridPane hgap="15.0" vgap="15">
-               <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="300.0" />
-               </columnConstraints>
-               <children>
-                  <Label text="Họ và tên" GridPane.rowIndex="1">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font>
-                  </Label>
-                  <TextField fx:id="nameField" disable="true" promptText="Nhập họ và tên" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                     <GridPane.margin>
-                        <Insets />
-                     </GridPane.margin>
-                  </TextField>
-                  <TextField fx:id="emailField" disable="true" promptText="example@email.com" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                  <DatePicker fx:id="dobPicker" disable="true" prefHeight="25.0" prefWidth="307.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                     <GridPane.margin>
-                        <Insets />
-                     </GridPane.margin>
-                  </DatePicker>
-                  <HBox prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                     <children>
-                        <CheckBox fx:id="femaleCheckbox" disable="true" mnemonicParsing="false" onAction="#chooseFemaleGender" text="Nữ" />
-                        <CheckBox fx:id="maleCheckbox" disable="true" mnemonicParsing="false" onAction="#chooseMaleGender" text="Nam" />
-                     </children>
-                  </HBox>
-                  <Label text="ID">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font>
-                  </Label>
-                  <TextField fx:id="phoneField" disable="true" promptText="0123456789" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <TextField fx:id="IDField" disable="true" GridPane.columnIndex="1" />
-                  <Label text="Giới tính" GridPane.rowIndex="2">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font>
-                  </Label>
-                  <Label text="Ngày sinh" GridPane.rowIndex="3">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font>
-                  </Label>
-                  <Label text="Điện thoại" GridPane.rowIndex="4">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font>
-                  </Label>
-                  <Label text="Email" GridPane.rowIndex="5">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font>
-                  </Label>
-               </children>
-               <rowConstraints>
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" />
-                  <RowConstraints />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" />
-                  <RowConstraints />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" />
-                  <RowConstraints />
-               </rowConstraints>
-               <VBox.margin>
-                  <Insets left="10.0" right="10.0" />
-               </VBox.margin>
-            </GridPane>
-            <HBox spacing="10.0">
-               <children>
-                  <StackPane prefHeight="29.0" prefWidth="105.0">
-                     <children>
-                        <Button fx:id="profileSaveButton" mnemonicParsing="false" onAction="#handleProfileSaveChanges" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Lưu thay đổi">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="profileEditButton" mnemonicParsing="false" onAction="#handleProfileEditChanges" prefHeight="29.0" prefWidth="105.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Thay đổi">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Button>
-                     </children>
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                  </StackPane>
-               </children>
-               <VBox.margin>
-                  <Insets left="10.0" />
-               </VBox.margin>
-            </HBox>
-            <AnchorPane prefHeight="20.0" prefWidth="423.0" />
-         </children>
-      </VBox>
-   </children>
-</VBox>
+<BorderPane prefHeight="800.0" prefWidth="1280.0" style="-fx-background-color: #7db4e8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.PatientProfileController">
+    <left>
+        <VBox prefWidth="180.0" style="-fx-background-color: #378DBD;" spacing="20.0" alignment="TOP_CENTER" BorderPane.alignment="CENTER">
+            <children>
+                <Button fx:id="homeButton" alignment="CENTER" mnemonicParsing="false" onAction="#onHomeButtonClick" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: transparent;">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@icons/home.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <font>
+                        <Font name="Arial Bold" size="14.0" />
+                    </font>
+                    <cursor>
+                        <Cursor fx:constant="HAND" />
+                    </cursor>
+                </Button>
+                <Button fx:id="appointmentsButton" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#onAppointmentsButtonClick" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: transparent; -fx-text-fill: white;" text=" Appointments">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@icons/calendar.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <font>
+                        <Font name="Arial Bold" size="14.0" />
+                    </font>
+                    <cursor>
+                        <Cursor fx:constant="HAND" />
+                    </cursor>
+                </Button>
+                <Button fx:id="profileButton" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#onProfileButtonClick" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: transparent; -fx-text-fill: white;" text=" Profile">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@icons/user.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <font>
+                        <Font name="Arial Bold" size="14.0" />
+                    </font>
+                    <cursor>
+                        <Cursor fx:constant="HAND" />
+                    </cursor>
+                </Button>
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <VBox padding="20.0" spacing="20.0">
+            <children>
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Hồ sơ người dùng">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Text>
+                <VBox style="-fx-background-color: #ebf4fc;">
+                    <children>
+                        <AnchorPane prefHeight="20.0" prefWidth="423.0" />
+                        <GridPane hgap="15.0" vgap="15.0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="300.0" />
+                            </columnConstraints>
+                            <children>
+                                <Label text="Họ và tên" GridPane.rowIndex="1">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                                <TextField fx:id="nameField" disable="true" promptText="Nhập họ và tên" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                <TextField fx:id="emailField" disable="true" promptText="example@email.com" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                <DatePicker fx:id="dobPicker" disable="true" prefHeight="25.0" prefWidth="307.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                <HBox prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                    <children>
+                                        <CheckBox fx:id="femaleCheckbox" disable="true" mnemonicParsing="false" onAction="#chooseFemaleGender" text="Nữ" />
+                                        <CheckBox fx:id="maleCheckbox" disable="true" mnemonicParsing="false" onAction="#chooseMaleGender" text="Nam" />
+                                    </children>
+                                </HBox>
+                                <Label text="ID">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                                <TextField fx:id="phoneField" disable="true" promptText="0123456789" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                <TextField fx:id="IDField" disable="true" GridPane.columnIndex="1" />
+                                <Label text="Giới tính" GridPane.rowIndex="2">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Ngày sinh" GridPane.rowIndex="3">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Điện thoại" GridPane.rowIndex="4">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Email" GridPane.rowIndex="5">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                            <rowConstraints>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                                <RowConstraints />
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                                <RowConstraints />
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                                <RowConstraints />
+                            </rowConstraints>
+                        </GridPane>
+                        <HBox spacing="10.0">
+                            <children>
+                                <StackPane prefHeight="29.0" prefWidth="105.0">
+                                    <children>
+                                        <Button fx:id="profileSaveButton" mnemonicParsing="false" onAction="#handleProfileSaveChanges" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Lưu thay đổi">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </Button>
+                                        <Button fx:id="profileEditButton" mnemonicParsing="false" onAction="#handleProfileEditChanges" prefHeight="29.0" prefWidth="105.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Thay đổi">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </Button>
+                                    </children>
+                                </StackPane>
+                            </children>
+                        </HBox>
+                        <AnchorPane prefHeight="20.0" prefWidth="423.0" />
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

@@ -1,6 +1,7 @@
 package com.medisys.controller;
 
 import com.medisys.util.DatabaseManager;
+import com.medisys.Main;
 import com.medisys.model.Patient;
 
 import javafx.event.ActionEvent;
@@ -163,6 +164,32 @@ public class PatientProfileController {
             setPatient(currentPatient);
         } else {
             // Optionally: set default values or log a warning
+        }
+    }
+    @FXML
+    private void onHomeButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("AppointmentOne_1");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onAppointmentsButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("Appointment"); // or "AppointmentBooking" if that's your FXML name
+       } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onProfileButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("PatientProfile");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -131,12 +131,12 @@ public class AppointmentOne_1_Ctrler {
 		stage.show();
 	}
 
-    public void switchToAppointmentBooking(Doctor selecteDoctor, javafx.scene.input.MouseEvent event) throws IOException {
+    public void switchToAppointmentBooking(Doctor selectedDoctor, javafx.scene.input.MouseEvent event) throws IOException {
 		FXMLLoader loader = new FXMLLoader (getClass().getResource("/com/medisys/view/Appointment.fxml"));
         root = loader.load();
 
         AppointmentController appointmentController = loader.getController();
-        appointmentController.setSelectedDoctor(selecteDoctor);
+        appointmentController.setSelectedDoctor(selectedDoctor);
 
 		stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 		scene = new Scene(root);
