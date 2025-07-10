@@ -22,6 +22,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+//import javafx.scene.chart.PieChart.Data;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -69,10 +70,10 @@ public class AppointmentOne_1_Ctrler {
 
     public AppointmentOne_1_Ctrler() {
         // Constructor, leave empty for FXML injection.
+        this.dbManager = DatabaseManager.getInstance();
     }
     @FXML
     public void initialize() {
-        dbManager = new DatabaseManager();
 
         try {
             List<Doctor> doctorsFromDb = dbManager.getAllDoctors();

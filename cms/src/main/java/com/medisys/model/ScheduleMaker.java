@@ -5,21 +5,20 @@ import java.util.List;
 
 public class ScheduleMaker {
     private List<Appointment> appointments;
-    DatabaseManager data;
+    private DatabaseManager dbManager;
 
     //construct a list to store appointments
     public ScheduleMaker() {
         this.appointments = new ArrayList<>();
-        data = new DatabaseManager();
-        data.createTables();
-        this.appointments = data.getAllAppointments();
+        this.dbManager =DatabaseManager.getInstance();
+        this.appointments = dbManager.getAllAppointments();
     }
 
     //add new appointment to the list
     public boolean addAppointment(Appointment appointment) {
         if (checkAppointment(appointment)) {
             // Add to database first
-            int appointmentId = data.addAppointment(
+            int appointmentId = dbManager.addAppointment(
                 appointment.getPatientId(), 
                 appointment.getDoctorID(), 
                 appointment.getField(), 
@@ -44,11 +43,11 @@ public class ScheduleMaker {
     }
 
     public DatabaseManager getData() {
-        return data;
+        return dbManager;
     }
 
     public boolean removeAppointment(Appointment appointment) {
-        if(this.data.deleteAppointment(appointment.getId())) {
+        if(this.dbManager.deleteAppointment(appointment.getId())) {
             return true;
         }
         else {

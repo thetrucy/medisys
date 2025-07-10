@@ -13,7 +13,7 @@ import java.io.IOException;
 public class Main extends Application {
 
     private static Scene scene;
-    private DatabaseManager dbManager;
+
 
     public static void main(String[] args) {
         launch();
@@ -22,8 +22,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         // --- Database Initialization (RE-ADDED) ---
-        dbManager = new DatabaseManager(); // Initialize your DatabaseManager
-        dbManager.createTables();         // This will create tables and pre-populate doctors if needed
+        DatabaseManager.getInstance();        // This will create tables and pre-populate doctors if needed
         // --- End Database Initialization ---
 
         scene = new Scene(loadFXML("view/AppointmentOne_1"));

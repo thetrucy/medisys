@@ -12,6 +12,7 @@ import java.util.List;
 
 public class DatabaseManager {
 
+    private static DatabaseManager instance;
     private static final String DATABASE_URL = "jdbc:sqlite:medical_cms.db"; // Local database file
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -19,6 +20,15 @@ public class DatabaseManager {
      * Establishes a connection to the SQLite database.
      * @return A Connection object.
      */
+    private DatabaseManager() {
+        createTables();
+    }
+    public static synchronized DatabaseManager getInstance() {
+    if (instance == null) {
+        instance = new DatabaseManager();
+    }
+    return instance;
+    }
     private Connection connect() {
         Connection conn = null;
         try {
