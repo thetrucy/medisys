@@ -22,7 +22,6 @@ public class DatabaseManager {
      */
     private DatabaseManager() {
         createTables();
-        populateInitialPatients();
     }
     public static synchronized DatabaseManager getInstance() {
     if (instance == null) {
@@ -46,17 +45,20 @@ public class DatabaseManager {
     public void createTables() {
         String createPatientsTableSQL = """
             CREATE TABLE IF NOT EXISTS patients (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
+                db_id INTEGER PRIMARY KEY AUTOINCREMENT,   -- Database's internal ID
+                username TEXT NOT NULL UNIQUE,            -- Your unique username
+                password TEXT NOT NULL,                   -- Hashed password
+                patient_id INTEGER NOT NULL UNIQUE,        -- Your unique 12-digit ID
+                name TEXT,
                 phone TEXT,
-                dob TEXT,
-
+                dob TEXT
             );
             """;
 
         String createDoctorsTableSQL = """
             CREATE TABLE IF NOT EXISTS doctors (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                db_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                doctor_id INTEGER NOT NULL UNIQUE,
                 name TEXT NOT NULL,
                 faculty TEXT NOT NULL,
                 phone TEXT NOT NULL UNIQUE,
@@ -80,7 +82,7 @@ public class DatabaseManager {
             """;
 
         try (Connection conn = connect();
-             Statement stmt = conn.createStatement()) {
+            Statement stmt = conn.createStatement()) {
             // Create tables
             stmt.execute(createPatientsTableSQL);
             stmt.execute(createDoctorsTableSQL);
@@ -91,6 +93,11 @@ public class DatabaseManager {
             if (isTableEmpty("doctors", conn)) {
                 System.out.println("Doctors table is empty. Populating with initial data...");
                 populateInitialDoctors(conn);
+            }
+            // Check if doctors table is empty and pre-populate
+            if (isTableEmpty("patients", conn)) {
+                System.out.println("Patients table is empty. Populating with initial data...");
+                populateInitialPatients(conn);
             }
 
         } catch (SQLException e) {
@@ -115,22 +122,24 @@ public class DatabaseManager {
         }
         return true; // Should not happen if table exists, but as a fallback
     }
-        private void populateInitialPatients() {
+    private void populateInitialPatients(Connection conn) {
         // You can use a hardcoded list of patients here
         List<Patient> initialPatients = new ArrayList<>();
-        initialPatients.add(new Patient("John Doe", "123-456-7890", "1990-01-01"));
-        initialPatients.add(new Patient("Jane Smith", "234-567-8901", "1985-05-15"));
+        initialPatients.add(new Patient("apple","123123A@",79123123123L,"John Doe", "123-456-7890", "1990-01-01"));
+        initialPatients.add(new Patient("banana","123123T@",7912341234L,"Jane Smith", "234-567-8901", "1985-05-15"));
 
         // SQL to insert patients
-        String sql = "INSERT OR IGNORE INTO Patients(name, phone, dob) VALUES(?, ?, ?)";
+        String sql = "INSERT OR IGNORE INTO Patients(username, password, id, name, phone, dob) VALUES(?, ?, ?, ?, ?, ?)";
         
-        try (Connection conn = DriverManager.getConnection(DATABASE_URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             for (Patient patient : initialPatients) {
-                pstmt.setString(1, patient.getName());
-                pstmt.setString(2, patient.getPhone());
-                pstmt.setString(3, patient.getDOB());
+                pstmt.setString(1, patient.getUsername());
+                pstmt.setString(2, patient.getPassword());
+                pstmt.setLong(3, patient.getId());
+                pstmt.setString(4, patient.getName());
+                pstmt.setString(5, patient.getPhone());
+                pstmt.setString(6, patient.getDOB());
 
                 pstmt.executeUpdate();
             }
@@ -145,27 +154,28 @@ public class DatabaseManager {
      * This method is called only if the doctors table is empty.
      * @param conn The database connection.
      */
- private void populateInitialDoctors(Connection conn) {
+    private void populateInitialDoctors(Connection conn) {
         List<Doctor> initialDoctors = new ArrayList<>();
         // Use your Doctor constructor: (name, faculty, phone, email)
-        initialDoctors.add(new Doctor("Dr. John Smith", "General Practice", "0901234567", "john.smith@medisys.com", "Room 1"));
-        initialDoctors.add(new Doctor("Dr. Jane Doe", "Pediatrics", "0907654321", "jane.doe@medisys.com", "Room 2"));
-        initialDoctors.add(new Doctor("Dr. Robert Johnson", "Cardiology", "0912345678", "robert.j@medisys.com", "Room 3"));
-        initialDoctors.add(new Doctor("Dr. Mary Lee", "Dermatology", "0918765432", "mary.l@medisys.com", "Room 4"));
-        initialDoctors.add(new Doctor("Dr. David Kim", "Orthopedics", "0923456789", "david.k@medisys.com", "Room 5"));
-        initialDoctors.add(new Doctor("Dr. Sarah Chen", "Internal Medicine", "0929876543", "sarah.c@medisys.com", "Room 6"));
+        initialDoctors.add(new Doctor(71111111,"Dr. John Smith", "General Practice", "0901234567", "john.smith@medisys.com", "Room 1"));
+        initialDoctors.add(new Doctor(71111222,"Dr. Jane Doe", "Pediatrics", "0907654321", "jane.doe@medisys.com", "Room 2"));
+        initialDoctors.add(new Doctor(71111333,"Dr. Robert Johnson", "Cardiology", "0912345678", "robert.j@medisys.com", "Room 3"));
+        initialDoctors.add(new Doctor(72222111,"Dr. Mary Lee", "Dermatology", "0918765432", "mary.l@medisys.com", "Room 4"));
+        initialDoctors.add(new Doctor(72222223,"Dr. David Kim", "Orthopedics", "0923456789", "david.k@medisys.com", "Room 5"));
+        initialDoctors.add(new Doctor(71113222,"Dr. Sarah Chen", "Internal Medicine", "0929876543", "sarah.c@medisys.com", "Room 6"));
 
         // SQL should use 'faculty' as the column name in the DB
-        String sql = "INSERT INTO doctors(name, faculty, phone, email, room) VALUES(?,?,?,?,?)";
+        String sql = "INSERT INTO doctors(doctor_id,name, faculty, phone, email, room) VALUES(?,?,?,?,?,?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
 
             for (Doctor doctor : initialDoctors) {
-                pstmt.setString(1, doctor.getName());
-                pstmt.setString(2, doctor.getFaculty()); 
-                pstmt.setString(3, doctor.getPhone());
-                pstmt.setString(4, doctor.getEmail());
-                pstmt.setString(5, doctor.getRoom());
+                pstmt.setLong(1, doctor.getId());
+                pstmt.setString(2, doctor.getName());
+                pstmt.setString(3, doctor.getFaculty()); 
+                pstmt.setString(4, doctor.getPhone());
+                pstmt.setString(5, doctor.getEmail());
+                pstmt.setString(6, doctor.getRoom());
                 pstmt.addBatch();
             }
             pstmt.executeBatch();
@@ -190,17 +200,18 @@ public class DatabaseManager {
             }
         }
     }
-    public long addDoctor(Doctor doctor) {
-        String sql = "INSERT INTO doctors(name, faculty, phone, email, room) VALUES(?,?,?,?,?)";
-        long doctorId = -1;
+    public int addDoctor(Doctor doctor) {
+        String sql = "INSERT INTO doctors(doctor_id, name, faculty, phone, email, room) VALUES(?,?,?,?,?,?)";
+        int doctorId = -1;
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, doctor.getName());
-            pstmt.setString(2, doctor.getFaculty());
-            pstmt.setString(3, doctor.getPhone());
-            pstmt.setString(4, doctor.getEmail());
-            pstmt.setString(5, doctor.getRoom());
-            pstmt.executeUpdate();
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                pstmt.setLong(1, doctor.getId());
+                pstmt.setString(2, doctor.getName());
+                pstmt.setString(3, doctor.getFaculty()); 
+                pstmt.setString(4, doctor.getPhone());
+                pstmt.setString(5, doctor.getEmail());
+                pstmt.setString(6, doctor.getRoom());
+                pstmt.executeUpdate();
 
             ResultSet rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
@@ -218,13 +229,14 @@ public class DatabaseManager {
     }
     public List<Doctor> getAllDoctors() {
         List<Doctor> doctors = new ArrayList<>();
-        String sql = "SELECT id, name, faculty, phone, email, room FROM doctors";
+        String sql = "SELECT id, doctor_id, name, faculty, phone, email, room FROM doctors";
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 doctors.add(new Doctor(
                     rs.getInt("id"),
+                    rs.getLong("doctor_id"),
                     rs.getString("name"),
                     rs.getString("faculty"),
                     rs.getString("phone"),
@@ -239,14 +251,14 @@ public class DatabaseManager {
     }
       
     public Doctor getDoctorById(long doctorId) {
-        String sql = "SELECT id, name, faculty, phone, email, room FROM doctors WHERE id = ?";
+        String sql = "SELECT doctor_id, name, faculty, phone, email, room FROM doctors WHERE doctor_id = ?";
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, doctorId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return new Doctor(
-                    rs.getInt("id"),
+                    rs.getInt("doctor_id"),
                     rs.getString("name"),
                     rs.getString("faculty"),
                     rs.getString("phone"),
@@ -260,9 +272,9 @@ public class DatabaseManager {
         return null;
     }
     public boolean updateDoctor(Doctor doctor) {
-        String sql = "UPDATE doctors SET name = ?, faculty = ?, phone = ?, email = ?, room = ? WHERE id = ?";
+        String sql = "UPDATE doctors SET name = ?, faculty = ?, phone = ?, email = ?, room = ? WHERE doctor_id = ?";
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, doctor.getName());
             pstmt.setString(2, doctor.getFaculty());
             pstmt.setString(3, doctor.getPhone());
@@ -287,9 +299,9 @@ public class DatabaseManager {
         }
     }
     public boolean deleteDoctor(long doctorId) {
-        String sql = "DELETE FROM doctors WHERE id = ?";
+        String sql = "DELETE FROM doctors WHERE doctor_id = ?";
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, doctorId);
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -308,20 +320,21 @@ public class DatabaseManager {
             return false;
         }
     }
-    public long addPatient(Patient patient) {
-        String sql = "INSERT INTO patients(name, phone, dob) VALUES(?,?,?)";
-        long patientId = -1;
+    public int addPatient(Patient patient) {
+        String sql = "INSERT INTO patients(patient_id, name, phone, dob) VALUES(?,?,?,?)";
+        int Id = -1;
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, patient.getName());
-            pstmt.setString(2, patient.getPhone());
-            pstmt.setString(3, patient.getDOB());
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setLong(1, patient.getId());
+            pstmt.setString(2, patient.getName());
+            pstmt.setString(3, patient.getPhone());
+            pstmt.setString(4, patient.getDOB());
             pstmt.executeUpdate();
 
             ResultSet rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
-                patientId = rs.getInt(1);
-                System.out.println("Patient added with ID: " + patientId);
+                Id = rs.getInt(1);
+                System.out.println("Patient added with database ID: " + Id);
             }
         } catch (SQLException e) {
             if (e.getMessage().contains("UNIQUE constraint failed: patients.phone")) {
@@ -330,7 +343,7 @@ public class DatabaseManager {
                 System.err.println("Error adding patient: " + e.getMessage());
             }
         }
-        return patientId;
+        return Id;
     }
 
     /**
@@ -361,7 +374,29 @@ public class DatabaseManager {
         }
         return appointmentId;
     }
+    public int addAppointment(Appointment appointments) { // MODIFIED SIGNATURE
+        String sql = "INSERT INTO appointments(patient_id, doctor_id, field, appointment_time, doctor_name_at_booking, room) VALUES(?,?,?,?,?,?)"; // MODIFIED SQL
+        int appointmentId = -1;
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setLong(1, appointments.getPatientId());
+            pstmt.setLong(2, appointments.getDoctorID()); 
+            pstmt.setString(3, appointments.getField());
+            pstmt.setString(4, appointments.getAppointmentTime().format(DATE_TIME_FORMATTER));
+            pstmt.setString(5, appointments.getDoctor());
+            pstmt.setString(6, appointments.getRoom());
+            pstmt.executeUpdate();
 
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                appointmentId = rs.getInt(1);
+                System.out.println("Appointment added with ID: " + appointmentId);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error adding appointment: " + e.getMessage());
+        }
+        return appointmentId;
+    }
     public boolean deleteAppointment(int appointmentId) {
         String sql = "DELETE FROM appointments WHERE id = ?";
         try (Connection conn = connect();
@@ -388,13 +423,13 @@ public class DatabaseManager {
      */
     public List<Patient> getAllPatients() {
         List<Patient> patients = new ArrayList<>();
-        String sql = "SELECT id, name, phone, dob FROM patients";
+        String sql = "SELECT patient_id, name, phone, dob FROM patients";
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 patients.add(new Patient(
-                    rs.getInt("id"),
+                    rs.getLong("patient_id"),
                     rs.getString("name"),
                     rs.getString("phone"),
                     rs.getString("dob")
@@ -439,7 +474,7 @@ public class DatabaseManager {
                 LocalDateTime time = LocalDateTime.parse(rs.getString("appointment_time"), DATE_TIME_FORMATTER);
                 appointments.add(new Appointment(
                     rs.getInt("id"),
-                    rs.getInt("patient_id"),
+                    rs.getLong("patient_id"),
                     rs.getString("field"),
                     time,
                     rs.getString("doctor_name"), // Display current doctor's name from DB
@@ -491,7 +526,7 @@ public class DatabaseManager {
                 LocalDateTime time = LocalDateTime.parse(rs.getString("appointment_time"), DATE_TIME_FORMATTER);
                 appointments.add(new Appointment(
                     rs.getInt("id"),
-                    rs.getInt("patient_id"),
+                    rs.getLong("patient_id"),
                     rs.getString("field"),
                     time,
                     rs.getString("doctor_name"), // Display current doctor's name from DB
@@ -542,7 +577,7 @@ public class DatabaseManager {
                 LocalDateTime time = LocalDateTime.parse(rs.getString("appointment_time"), DATE_TIME_FORMATTER);
                 appointments.add(new Appointment(
                     rs.getInt("id"),
-                    rs.getInt("patient_id"),
+                    rs.getLong("patient_id"),
                     rs.getString("field"),
                     time,
                     rs.getString("doctor_name"),
@@ -561,7 +596,7 @@ public class DatabaseManager {
      * @return True if update was successful, false otherwise.
      */
     public boolean updatePatient(Patient patient) {
-        String sql = "UPDATE patients SET name = ?, phone = ?, dob = ? WHERE id = ?";
+        String sql = "UPDATE patients SET name = ?, phone = ?, dob = ? WHERE patient_id = ?";
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, patient.getName());
@@ -592,7 +627,7 @@ public class DatabaseManager {
      * @return True if deletion was successful, false otherwise.
      */
     public boolean deletePatient(long patientId) {
-        String sql = "DELETE FROM patients WHERE id = ?";
+        String sql = "DELETE FROM patients WHERE patient_id = ?";
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, patientId);

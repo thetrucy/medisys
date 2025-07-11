@@ -65,6 +65,7 @@ public class AppointmentController implements Initializable {
     @FXML private Button submitButtonSelf;
 
     //other booking form fields
+    @FXML private TextField patientIdField; //----new
     @FXML private TextField patientNameField;
     @FXML private TextField patientDobField;
     @FXML private TextField patientPhoneField;
@@ -395,7 +396,7 @@ public class AppointmentController implements Initializable {
                     System.out.println("Created patient: " + patient);
 
                     // Add patient to database
-                    Long id = Appointments.getData().addPatient(patient);
+                    Integer id = Appointments.getData().addPatient(patient);
                     
                     if (patient == null) {
                         showErrorAlert("Lỗi", "Không thể tạo thông tin bệnh nhân.");
@@ -459,6 +460,7 @@ public class AppointmentController implements Initializable {
     private void handleSubmitOther(ActionEvent event) {
         if (validateOtherBookingForm()) {
             try {
+                String idText = patientIdField.getText().trim();
                 String patientName = patientNameField.getText().trim();
                 String patientDob = patientDobField.getText().trim();
                 String patientPhone = patientPhoneField.getText().trim();
@@ -469,7 +471,7 @@ public class AppointmentController implements Initializable {
                 String appointmentTime = appointmentTimeOther.getValue();
 
                 // Validate required fields
-                if (patientName.isEmpty() || patientPhone.isEmpty() || 
+                if (idText.isEmpty() || patientName.isEmpty() || patientPhone.isEmpty() || 
                     relationship == null || guardName.isEmpty() || guardPhone.isEmpty() ||
                     appointmentDate == null || appointmentTime == null) {
                     showErrorAlert("Thiếu thông tin", "Vui lòng điền đầy đủ thông tin");
@@ -477,15 +479,16 @@ public class AppointmentController implements Initializable {
                 }
 
                 // Create and save patient
-                Patient patient = new Patient(patientName, patientPhone, patientDob);
+                Long patientId = Long.parseLong(idText);
+                Patient patient = new Patient(patientId, patientName, patientPhone, patientDob);
                 patient.setGuard(relationship, guardName, guardPhone);
                 
-                Long patientId = Appointments.getData().addPatient(patient);
-                if (patientId == null || patientId <= 0) {
+                Integer id = Appointments.getData().addPatient(patient);
+                if (id == null || id <= 0) {
                     showErrorAlert("Lỗi", "Không thể thêm bệnh nhân vào cơ sở dữ liệu.");
                     return;
                 }
-                patient.setID(patientId); // This was missing!
+                patient.setID(id); // This was missing!
 
                 // Verify doctor selected
                 if (selectedDoctor == null) {
@@ -561,6 +564,9 @@ public class AppointmentController implements Initializable {
     private boolean validateOtherBookingForm() {
         StringBuilder errors = new StringBuilder();
 
+        if (patientIdField.getText().trim().isEmpty()) {
+            errors.append("- Vui lòng nhập CMND/CCCD bệnh nhân\n");
+        }
         if (patientNameField.getText().trim().isEmpty()) {
             errors.append("- Vui lòng nhập họ và tên bệnh nhân\n");
         }
@@ -607,6 +613,7 @@ public class AppointmentController implements Initializable {
     }
 
     private void clearOtherForm() {
+        patientIdField.clear();
         patientNameField.clear();
         patientDobField.clear();
         patientPhoneField.clear();
@@ -645,7 +652,7 @@ public class AppointmentController implements Initializable {
     @FXML
     private void onAppointmentsButtonClick(ActionEvent event) {
         try {
-            Main.setRoot("Appointment"); // or "AppointmentBooking" if that's your FXML name
+            Main.setRoot("Appointment");
        } catch (Exception e) {
             e.printStackTrace();
         }

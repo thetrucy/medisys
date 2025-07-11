@@ -3,34 +3,31 @@ package com.medisys.model;
 import javafx.beans.property.SimpleStringProperty;
 
 public class Doctor {
-    private long id;
-    
+    private long doctor_id;
+    private int id; //---auto increment
     private final SimpleStringProperty name;
     private String phone;
     private final SimpleStringProperty email;
     private final SimpleStringProperty faculty;
     private final SimpleStringProperty room;
 
-    public Doctor(String name,String faculty,  String phone, String email, String room) {
-        this.name = new SimpleStringProperty(name);
-        this.phone = phone;
-        this.email = new SimpleStringProperty(email);
-        this.faculty = new SimpleStringProperty(faculty);
-        this.room = new SimpleStringProperty(room);
-    }
 
-    public Doctor(long id,  String name, String faculty,  String phone, String email, String room) {
-        this.id = id;
+
+    public Doctor(long doctor_id,  String name, String faculty,  String phone, String email, String room) {
+        this.doctor_id = doctor_id;
         this.phone = phone;
         this.name = new SimpleStringProperty(name);
         this.email = new SimpleStringProperty(email);
         this.faculty = new SimpleStringProperty(faculty);
         this.room = new SimpleStringProperty(room);
     } 
-
+    public Doctor(int id, long doctor_id, String name, String faculty, String phone, String email, String room) {
+        this(doctor_id, name, faculty, phone, email, room);
+        this.id = id;
+    }
     //getters
     public long getId() {
-        return id;
+        return doctor_id;
     }
     public String getName() {
         return name.get();
@@ -65,6 +62,6 @@ public class Doctor {
     }
    
     public void setId(Integer value) {
-        id = value;
+        doctor_id = value;
     }
 }
