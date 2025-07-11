@@ -9,7 +9,11 @@ import com.medisys.model.Doctor;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 //import javafx.scene.effect.BlurType;
 import javafx.scene.effect.BoxBlur;
@@ -17,11 +21,11 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 
+import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,12 +33,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.List;
 import com.medisys.util.DatabaseManager;
 
 public class AppointmentController implements Initializable {
     ScheduleMaker Appointments;
     private Doctor selectedDoctor;
     private DatabaseManager dbManager;
+    private Stage stage;
+	private Scene scene;
+	private Parent root;
    // DatabaseManager appointedDoctors;
     static Integer appointmentID = 0;
 
@@ -83,6 +91,7 @@ public class AppointmentController implements Initializable {
         Appointments = new ScheduleMaker();
        // appointedDoctors = new DatabaseManager();
         appointmentID = getNextAvailableAppointmentId();
+        loadExistingAppointments();
 
         appointmentDateSelf.valueProperty().addListener((obs, oldDate, newDate) -> {
         updateTimeSlots(appointmentTimeSelf, appointmentDateSelf);
@@ -114,6 +123,15 @@ public class AppointmentController implements Initializable {
         appointmentTimeOther.setItems(FXCollections.observableArrayList(timeSlots));
     }
 
+    @FXML
+    private void handleBackAction(ActionEvent event) throws IOException {
+        root = FXMLLoader.load(getClass().getResource("/com/medisys/view/AppointmentOne_1.fxml"));
+		stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+		scene = new Scene(root);
+		stage.setScene(scene);
+		stage.show();
+    }
+
     private Integer getNextAvailableAppointmentId() {
         if (Appointments.getAppointments().isEmpty()) {
             return 1;
@@ -137,6 +155,7 @@ public class AppointmentController implements Initializable {
         );
             if (appointmentId > 0) {
                 appointment.setID(appointmentId);
+                Appointments.addAppointment(appointment);
                 return true;
             } else {
                 System.err.println("Failed to save appointment (returned false)");
@@ -146,6 +165,17 @@ public class AppointmentController implements Initializable {
             System.err.println("Database error saving appointment:");
             e.printStackTrace();
             return false;
+        }
+    }
+
+    private void loadExistingAppointments() {
+        try{
+            List<Appointment> dbAppointments = dbManager.getAllAppointments();
+            for (Appointment tempApp : dbAppointments) {
+                Appointments.addAppointment(tempApp);
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading existing appointments: " + e.getMessage());
         }
     }
     

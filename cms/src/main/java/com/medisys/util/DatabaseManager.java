@@ -22,6 +22,7 @@ public class DatabaseManager {
      */
     private DatabaseManager() {
         createTables();
+        populateInitialPatients();
     }
     public static synchronized DatabaseManager getInstance() {
     if (instance == null) {
@@ -47,8 +48,9 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS patients (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                phone TEXT NOT NULL UNIQUE,
-                dob TEXT
+                phone TEXT,
+                dob TEXT,
+
             );
             """;
 
@@ -112,6 +114,31 @@ public class DatabaseManager {
             }
         }
         return true; // Should not happen if table exists, but as a fallback
+    }
+        private void populateInitialPatients() {
+        // You can use a hardcoded list of patients here
+        List<Patient> initialPatients = new ArrayList<>();
+        initialPatients.add(new Patient("John Doe", "123-456-7890", "1990-01-01"));
+        initialPatients.add(new Patient("Jane Smith", "234-567-8901", "1985-05-15"));
+
+        // SQL to insert patients
+        String sql = "INSERT OR IGNORE INTO Patients(name, phone, dob) VALUES(?, ?, ?)";
+        
+        try (Connection conn = DriverManager.getConnection(DATABASE_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            for (Patient patient : initialPatients) {
+                pstmt.setString(1, patient.getName());
+                pstmt.setString(2, patient.getPhone());
+                pstmt.setString(3, patient.getDOB());
+
+                pstmt.executeUpdate();
+            }
+            System.out.println("Initial patients populated.");
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
         /**
      * Populates the doctors table with initial data.
