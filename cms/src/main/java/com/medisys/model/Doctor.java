@@ -62,6 +62,6 @@ public class Doctor {
     }
    
     public void setId(Integer value) {
-        doctor_id = value;
+        id = value;
     }
 }

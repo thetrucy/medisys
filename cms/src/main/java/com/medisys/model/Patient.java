@@ -23,6 +23,10 @@ public class Patient {
         this.phone = phone;
         this.dob = dob;
     }
+    public Patient(int id, String username, String password, long patient_id, String name, String phone, String dob) {
+        this(username, password, patient_id, name, phone, dob);
+        this.id = id;
+    }
     public Patient(String name, String phone, String dob) {
         this.name = name;
         this.phone = phone;

@@ -159,11 +159,19 @@ public class PatientProfileController {
     // Phương thức này được JavaFX tự động gọi sau khi load FXML xong
     @FXML
     public void initialize() {
-        // Bạn có thể load thông tin người dùng hiện tại ở đây
+        // Bạn có thể load thông tin người dùng hiện tại ở đây{
+        // --- Mô phỏng Đăng nhập: Tìm bệnh nhân bằng username ---
+        
+        String demoUsername = "apple";
+        
+        // Gọi phương thức mới để tìm bệnh nhân
+        currentPatient = DatabaseManager.getInstance().getPatientByUsername(demoUsername);
+        
         if (currentPatient != null) {
             setPatient(currentPatient);
         } else {
-            // Optionally: set default values or log a warning
+            System.err.println("Không tìm thấy bệnh nhân demo '" + demoUsername + "' trong cơ sở dữ liệu.");
+            
         }
     }
     @FXML
@@ -178,7 +186,7 @@ public class PatientProfileController {
     @FXML
     private void onAppointmentsButtonClick(ActionEvent event) {
         try {
-            Main.setRoot("Appointment"); // or "AppointmentBooking" if that's your FXML name
+            Main.setRoot("Appointment"); 
        } catch (Exception e) {
             e.printStackTrace();
         }

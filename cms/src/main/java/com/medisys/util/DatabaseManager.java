@@ -440,7 +440,32 @@ public class DatabaseManager {
         }
         return patients;
     }
-
+//get patient by username
+    public Patient getPatientByUsername(String username) {
+        String sql = "SELECT id, username, password, patient_id, name, phone, dob FROM Patients WHERE username = ?";
+        
+        try (Connection conn = connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return new Patient(
+                    rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("password"),
+                    rs.getLong("patient_id"),
+                    rs.getString("name"),
+                    rs.getString("phone"),
+                    rs.getString("dob")
+                );
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving patient by username '" + username + "': " + e.getMessage());
+        }
+        return null;
+    }
     /**
      * Retrieves all appointments from the database, including patient name.
      * @return A list of Appointment objects.
