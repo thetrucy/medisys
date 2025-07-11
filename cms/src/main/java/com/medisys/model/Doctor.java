@@ -3,7 +3,7 @@ package com.medisys.model;
 import javafx.beans.property.SimpleStringProperty;
 
 public class Doctor {
-    private int id;
+    private long id;
     
     private final SimpleStringProperty name;
     private String phone;
@@ -19,7 +19,7 @@ public class Doctor {
         this.room = new SimpleStringProperty(room);
     }
 
-    public Doctor(int id,  String name, String faculty,  String phone, String email, String room) {
+    public Doctor(long id,  String name, String faculty,  String phone, String email, String room) {
         this.id = id;
         this.phone = phone;
         this.name = new SimpleStringProperty(name);
@@ -29,7 +29,7 @@ public class Doctor {
     } 
 
     //getters
-    public int getId() {
+    public long getId() {
         return id;
     }
     public String getName() {

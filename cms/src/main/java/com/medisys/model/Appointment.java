@@ -11,14 +11,14 @@ public class Appointment {
     private LocalDateTime appointmentTime;
 
     // Constructors
-    public Appointment(int id, int doctorId, int patientId, String field, LocalDateTime appointmentTime, String doctorName, String patientName, String room) {
+    public Appointment(int id, long doctorId, long patientId, String field, LocalDateTime appointmentTime, String doctorName, String patientName, String room) {
         this.id = id;
         this.patient = new Patient(patientId, patientName, "", "");
         this.doctor = new Doctor(doctorId, doctorName, field, "", "", room);
         this.appointmentTime = appointmentTime;
     }
 
-    public Appointment(int doctorId, int patientId, String field, LocalDateTime appointmentTime, String doctorName, String patientName, String room) {
+    public Appointment(long doctorId, long patientId, String field, LocalDateTime appointmentTime, String doctorName, String patientName, String room) {
         this.patient = new Patient(patientId, patientName, "", "");
         this.doctor = new Doctor(doctorId, doctorName, field, "", "", room);
         this.appointmentTime = appointmentTime;
@@ -26,10 +26,10 @@ public class Appointment {
 
     // Getters
     public int getId() {
-        return patient.getId();
+        return id;
     }
 
-    public int getPatientId() {
+    public long getPatientId() {
         return patient.getId();
     }
 
@@ -41,7 +41,7 @@ public class Appointment {
         return appointmentTime;
     }
 
-    public int getDoctorID() {
+    public long getDoctorID() {
         return doctor.getId();
     }
 

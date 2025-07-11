@@ -190,9 +190,9 @@ public class DatabaseManager {
             }
         }
     }
-    public int addDoctor(Doctor doctor) {
+    public long addDoctor(Doctor doctor) {
         String sql = "INSERT INTO doctors(name, faculty, phone, email, room) VALUES(?,?,?,?,?)";
-        int doctorId = -1;
+        long doctorId = -1;
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, doctor.getName());
@@ -238,11 +238,11 @@ public class DatabaseManager {
         return doctors;
     }
       
-    public Doctor getDoctorById(int doctorId) {
+    public Doctor getDoctorById(long doctorId) {
         String sql = "SELECT id, name, faculty, phone, email, room FROM doctors WHERE id = ?";
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, doctorId);
+            pstmt.setLong(1, doctorId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return new Doctor(
@@ -268,7 +268,7 @@ public class DatabaseManager {
             pstmt.setString(3, doctor.getPhone());
             pstmt.setString(4, doctor.getEmail());
             pstmt.setString(5, doctor.getRoom());
-            pstmt.setInt(6, doctor.getId());
+            pstmt.setLong(6, doctor.getId());
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("Doctor ID " + doctor.getId() + " updated successfully.");
@@ -286,11 +286,11 @@ public class DatabaseManager {
             return false;
         }
     }
-    public boolean deleteDoctor(int doctorId) {
+    public boolean deleteDoctor(long doctorId) {
         String sql = "DELETE FROM doctors WHERE id = ?";
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, doctorId);
+            pstmt.setLong(1, doctorId);
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("Doctor ID " + doctorId + " deleted successfully.");
@@ -308,9 +308,9 @@ public class DatabaseManager {
             return false;
         }
     }
-    public int addPatient(Patient patient) {
+    public long addPatient(Patient patient) {
         String sql = "INSERT INTO patients(name, phone, dob) VALUES(?,?,?)";
-        int patientId = -1;
+        long patientId = -1;
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, patient.getName());
@@ -338,13 +338,13 @@ public class DatabaseManager {
      * @param appointment The Appointment object to add.
      * @return The generated ID of the new appointment, or -1 if insertion failed.
      */
-    public int addAppointment(int patientId, int doctorId, String field, LocalDateTime appointmentTime, String doctorNameAtBooking, String room) { // MODIFIED SIGNATURE
+    public int addAppointment(long patientId, long doctorId, String field, LocalDateTime appointmentTime, String doctorNameAtBooking, String room) { // MODIFIED SIGNATURE
         String sql = "INSERT INTO appointments(patient_id, doctor_id, field, appointment_time, doctor_name_at_booking, room) VALUES(?,?,?,?,?,?)"; // MODIFIED SQL
         int appointmentId = -1;
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setInt(1, patientId);
-            pstmt.setInt(2, doctorId); 
+            pstmt.setLong(1, patientId);
+            pstmt.setLong(2, doctorId); 
             pstmt.setString(3, field);
             pstmt.setString(4, appointmentTime.format(DATE_TIME_FORMATTER));
             pstmt.setString(5, doctorNameAtBooking);
@@ -459,7 +459,7 @@ public class DatabaseManager {
      * @param patientId The ID of the patient.
      * @return A list of Appointment objects for the given patient.
      */
-    public List<Appointment> getAppointmentsByPatient(int patientId) {
+    public List<Appointment> getAppointmentsByPatient(long patientId) {
         List<Appointment> appointments = new ArrayList<>();
         String sql = """
             SELECT
@@ -485,7 +485,7 @@ public class DatabaseManager {
             """;
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, patientId);
+            pstmt.setLong(1, patientId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 LocalDateTime time = LocalDateTime.parse(rs.getString("appointment_time"), DATE_TIME_FORMATTER);
@@ -510,7 +510,7 @@ public class DatabaseManager {
      * @param doctorId The ID of the doctor.
      * @return A list of Appointment objects for the given doctor.
      */
-    public List<Appointment> getAppointmentsByDoctor(int doctorId) { // NEW METHOD
+    public List<Appointment> getAppointmentsByDoctor(long doctorId) { // NEW METHOD
         List<Appointment> appointments = new ArrayList<>();
         String sql = """
             SELECT
@@ -536,7 +536,7 @@ public class DatabaseManager {
             """;
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, doctorId);
+            pstmt.setLong(1, doctorId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 LocalDateTime time = LocalDateTime.parse(rs.getString("appointment_time"), DATE_TIME_FORMATTER);
@@ -567,7 +567,7 @@ public class DatabaseManager {
             pstmt.setString(1, patient.getName());
             pstmt.setString(2, patient.getPhone());
             pstmt.setString(3, patient.getDOB());
-            pstmt.setInt(4, patient.getId());
+            pstmt.setLong(4, patient.getId());
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("Patient ID " + patient.getId() + " updated successfully.");
@@ -591,11 +591,11 @@ public class DatabaseManager {
      * @param patientId The ID of the patient to delete.
      * @return True if deletion was successful, false otherwise.
      */
-    public boolean deletePatient(int patientId) {
+    public boolean deletePatient(long patientId) {
         String sql = "DELETE FROM patients WHERE id = ?";
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, patientId);
+            pstmt.setLong(1, patientId);
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("Patient ID " + patientId + " and associated appointments deleted successfully.");

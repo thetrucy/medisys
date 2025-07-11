@@ -2,7 +2,9 @@ package com.medisys.model;
 
 
 public class Patient {
-    private int id;
+    private String username;
+    private String password;
+    private long id; //cmnd cccd
     private String name;
     private String phone;
     private String dob;
@@ -18,14 +20,14 @@ public class Patient {
     }
 
     // Constructor for retrieving patients from DB (includes ID)
-    public Patient(int id, String name, String phone, String dob) {
+    public Patient(long id, String name, String phone, String dob) {
         this.id = id;
         this.name = name;
         this.phone = phone;
         this.dob = dob;
     }
 
-    public Patient(int id, String name, String phone, String dob, String guardRela, String guardPhone, String guardName) {
+    public Patient(long id, String name, String phone, String dob, String guardRela, String guardPhone, String guardName) {
         this.id = id;
         this.name = name;
         this.phone = phone;
@@ -36,7 +38,7 @@ public class Patient {
     }
 
     // Getters
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -73,7 +75,7 @@ public class Patient {
         this.phone = phone;
     }
 
-    public void setID(Integer ID) {
+    public void setID(Long ID) {
         this.id = ID;
     }
 

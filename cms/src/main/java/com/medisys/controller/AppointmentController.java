@@ -395,7 +395,7 @@ public class AppointmentController implements Initializable {
                     System.out.println("Created patient: " + patient);
 
                     // Add patient to database
-                    Integer id = Appointments.getData().addPatient(patient);
+                    Long id = Appointments.getData().addPatient(patient);
                     
                     if (patient == null) {
                         showErrorAlert("Lỗi", "Không thể tạo thông tin bệnh nhân.");
@@ -480,7 +480,7 @@ public class AppointmentController implements Initializable {
                 Patient patient = new Patient(patientName, patientPhone, patientDob);
                 patient.setGuard(relationship, guardName, guardPhone);
                 
-                Integer patientId = Appointments.getData().addPatient(patient);
+                Long patientId = Appointments.getData().addPatient(patient);
                 if (patientId == null || patientId <= 0) {
                     showErrorAlert("Lỗi", "Không thể thêm bệnh nhân vào cơ sở dữ liệu.");
                     return;
