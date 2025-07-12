@@ -45,7 +45,7 @@ public class DatabaseManager {
     public void createTables() {
         String createPatientsTableSQL = """
             CREATE TABLE IF NOT EXISTS patients (
-                db_id INTEGER PRIMARY KEY AUTOINCREMENT,   -- Database's internal ID
+                id INTEGER PRIMARY KEY AUTOINCREMENT,   -- Database's internal ID
                 username TEXT NOT NULL UNIQUE,            -- Your unique username
                 password TEXT NOT NULL,                   -- Hashed password
                 patient_id INTEGER NOT NULL UNIQUE,        -- Your unique 12-digit ID
@@ -57,7 +57,7 @@ public class DatabaseManager {
 
         String createDoctorsTableSQL = """
             CREATE TABLE IF NOT EXISTS doctors (
-                db_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 doctor_id INTEGER NOT NULL UNIQUE,
                 name TEXT NOT NULL,
                 faculty TEXT NOT NULL,
@@ -99,7 +99,11 @@ public class DatabaseManager {
                 System.out.println("Patients table is empty. Populating with initial data...");
                 populateInitialPatients(conn);
             }
-
+            System.out.println("------Validate patients------");
+            List<Patient> initialPatients = getAllPatients();
+            for(Patient patient:initialPatients){
+                System.out.println(patient.getUsername());
+            }
         } catch (SQLException e) {
             System.err.println("Error creating tables or populating initial data: " + e.getMessage());
         }
@@ -129,7 +133,7 @@ public class DatabaseManager {
         initialPatients.add(new Patient("banana","123123T@",7912341234L,"Jane Smith", "234-567-8901", "1985-05-15"));
 
         // SQL to insert patients
-        String sql = "INSERT OR IGNORE INTO Patients(username, password, id, name, phone, dob) VALUES(?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT OR IGNORE INTO Patients(username, password, patient_id, name, phone, dob) VALUES(?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -165,7 +169,7 @@ public class DatabaseManager {
         initialDoctors.add(new Doctor(71113222,"Dr. Sarah Chen", "Internal Medicine", "0929876543", "sarah.c@medisys.com", "Room 6"));
 
         // SQL should use 'faculty' as the column name in the DB
-        String sql = "INSERT INTO doctors(doctor_id,name, faculty, phone, email, room) VALUES(?,?,?,?,?,?)";
+        String sql = "INSERT INTO doctors(doctor_id, name, faculty, phone, email, room) VALUES(?,?,?,?,?,?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
 
@@ -423,12 +427,13 @@ public class DatabaseManager {
      */
     public List<Patient> getAllPatients() {
         List<Patient> patients = new ArrayList<>();
-        String sql = "SELECT patient_id, name, phone, dob FROM patients";
+        String sql = "SELECT username, patient_id, name, phone, dob FROM patients";
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 patients.add(new Patient(
+                    rs.getString("username"),
                     rs.getLong("patient_id"),
                     rs.getString("name"),
                     rs.getString("phone"),
@@ -461,6 +466,7 @@ public class DatabaseManager {
                     rs.getString("dob")
                 );
             }
+
         } catch (SQLException e) {
             System.err.println("Error retrieving patient by username '" + username + "': " + e.getMessage());
         }

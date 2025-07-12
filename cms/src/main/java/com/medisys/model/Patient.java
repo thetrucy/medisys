@@ -40,7 +40,10 @@ public class Patient {
         this.phone = phone;
         this.dob = dob;
     }
-
+    public Patient(String username, long patient_id, String name, String phone, String dob) {
+        this(patient_id, name, phone, dob);
+        this.username = username;
+    }
     public Patient(long patient_id, String name, String phone, String dob, String guardRela, String guardPhone, String guardName) {
         this.patient_id = patient_id;
         this.name = name;
