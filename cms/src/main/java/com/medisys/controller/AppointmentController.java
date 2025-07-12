@@ -79,6 +79,7 @@ public class AppointmentController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        this.dbManager = DatabaseManager.getInstance();
         //Reset time in combo box
         initializeTimeSlots();
         genderBoxSelf.setItems(FXCollections.observableArrayList("Nam", "Nữ", "Khác"));
@@ -103,7 +104,6 @@ public class AppointmentController implements Initializable {
         });
 
         setupTimeSlotSelectionHandlers();
-        this.dbManager = DatabaseManager.getInstance();
     }
 
     // Add the enum for blur types
@@ -146,14 +146,7 @@ public class AppointmentController implements Initializable {
     private boolean saveAppointmentToDatabase(Appointment appointment) {
         try {
             System.out.println("Attempting to save appointment: " + appointment);
-            int appointmentId = dbManager.addAppointment(
-            appointment.getPatientId(),           
-            appointment.getDoctorID(),            
-            appointment.getField(),               
-            appointment.getAppointmentTime(),     
-            appointment.getDoctor(),              
-            appointment.getRoom()                 
-        );
+            int appointmentId = dbManager.addAppointment(appointment);          
             if (appointmentId > 0) {
                 appointment.setID(appointmentId);
                 Appointments.addAppointment(appointment);
@@ -205,7 +198,7 @@ public class AppointmentController implements Initializable {
         
         if (Appointments != null && date != null && doctor != null) {
             for (Appointment appointment : Appointments.getAppointments()) {
-                if (appointment.getDoctorID() == doctor.getId() && 
+                if (appointment.getDoctorId() == doctor.getId() && 
                     appointment.getAppointmentTime() != null && // Add null check
                     appointment.getAppointmentTime().toLocalDate().equals(date)) {
                     

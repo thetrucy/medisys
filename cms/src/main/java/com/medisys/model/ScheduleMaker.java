@@ -18,14 +18,7 @@ public class ScheduleMaker {
     public boolean addAppointment(Appointment appointment) {
         if (checkAppointment(appointment)) {
             // Add to database first
-            int appointmentId = dbManager.addAppointment(
-                appointment.getPatientId(), 
-                appointment.getDoctorID(), 
-                appointment.getField(), 
-                appointment.getAppointmentTime(), 
-                appointment.getDoctor(), 
-                appointment.getRoom()
-            );
+            int appointmentId = dbManager.addAppointment(appointment);
             
             // If database insertion was successful, add to local list
             if (appointmentId > 0) {

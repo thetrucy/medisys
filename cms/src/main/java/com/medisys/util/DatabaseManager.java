@@ -74,7 +74,8 @@ public class DatabaseManager {
                 doctor_id INTEGER NOT NULL,
                 field TEXT NOT NULL,
                 appointment_time TEXT NOT NULL,
-                doctor_name_at_booking TEXT NOT NULL,
+                doctor_name TEXT NOT NULL,
+                patient_name TEXT NOT NULL,
                 room TEXT NOT NULL,
                 FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
                 FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE RESTRICT
@@ -98,6 +99,10 @@ public class DatabaseManager {
             if (isTableEmpty("patients", conn)) {
                 System.out.println("Patients table is empty. Populating with initial data...");
                 populateInitialPatients(conn);
+            }
+            if (isTableEmpty("appointments", conn)) {
+                System.out.println("Appointments table is empty. Populating with initial data...");
+                populateInitialAppointments(conn);
             }
             System.out.println("------Validate patients------");
             List<Patient> initialPatients = getAllPatients();
@@ -204,6 +209,81 @@ public class DatabaseManager {
             }
         }
     }
+    public void populateInitialAppointments(Connection conn) {
+        // 1. Get a demo Patient and Doctor from the database
+        Patient patient = getPatientByUsername("apple"); 
+        Doctor doctor = getDoctorById(71111111L); 
+
+        if (patient == null || doctor == null) {
+            System.err.println("Cannot populate appointments: demo patient or doctor not found.");
+            return;
+        }
+
+        List<Appointment> initialAppointments = new ArrayList<>();
+        
+        // 2. Create the Appointment objects using the IDs from the fetched objects
+
+        LocalDateTime appointmentTime1 = LocalDateTime.of(2025,07,12,15,0,0);
+        LocalDateTime appointmentTime2 = LocalDateTime.of(2025,07,12,9,30,0);
+        
+        initialAppointments.add(new Appointment(
+            -1, // Placeholder for the auto-incrementing ID
+            patient.getId(), // Get patient's database ID
+            doctor.getId(),  // Get doctor's database ID
+            doctor.getFaculty(),
+            appointmentTime1,
+            doctor.getName(),
+            patient.getName(),
+            doctor.getRoom()
+        ));
+        initialAppointments.add(new Appointment(
+        -1,
+        patient.getId(),
+        doctor.getId(),
+        doctor.getFaculty(),
+        appointmentTime2,
+        doctor.getName(),
+        patient.getName(),
+        doctor.getRoom()
+    ));
+        // SQL should use 'faculty' as the column name in the DB
+        String sql = "INSERT INTO appointments(patient_id, doctor_id, field, appointment_time, doctor_name, patient_name, room) VALUES(?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(false); // Start transaction
+
+        for (Appointment appointment : initialAppointments) {
+            pstmt.setLong(1, appointment.getPatientId());
+            pstmt.setLong(2, appointment.getDoctorId());
+            pstmt.setString(3, appointment.getField());
+            pstmt.setString(4, appointment.getAppointmentTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            pstmt.setString(5, appointment.getDoctorName());
+            pstmt.setString(6, appointment.getPatientName());
+            pstmt.setString(7, appointment.getRoom());
+            pstmt.addBatch();
+        }
+            pstmt.executeBatch();
+            conn.commit();
+            System.out.println("Initial appointments populated successfully.");
+        } catch (SQLException e) {
+            System.err.println("Error populating initial appointments: " + e.getMessage());
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException rb_e) {
+                System.err.println("Rollback failed: " + rb_e.getMessage());
+            }
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                System.err.println("Error resetting auto-commit: " + e.getMessage());
+            }
+        }
+    }
     public int addDoctor(Doctor doctor) {
         String sql = "INSERT INTO doctors(doctor_id, name, faculty, phone, email, room) VALUES(?,?,?,?,?,?)";
         int doctorId = -1;
@@ -255,14 +335,15 @@ public class DatabaseManager {
     }
       
     public Doctor getDoctorById(long doctorId) {
-        String sql = "SELECT doctor_id, name, faculty, phone, email, room FROM doctors WHERE doctor_id = ?";
+        String sql = "SELECT id, doctor_id, name, faculty, phone, email, room FROM doctors WHERE doctor_id = ?";
         try (Connection conn = connect();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, doctorId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return new Doctor(
-                    rs.getInt("doctor_id"),
+                    rs.getInt("id"),
+                    rs.getLong("doctor_id"),
                     rs.getString("name"),
                     rs.getString("faculty"),
                     rs.getString("phone"),
@@ -355,40 +436,18 @@ public class DatabaseManager {
      * @param appointment The Appointment object to add.
      * @return The generated ID of the new appointment, or -1 if insertion failed.
      */
-    public int addAppointment(long patientId, long doctorId, String field, LocalDateTime appointmentTime, String doctorNameAtBooking, String room) { // MODIFIED SIGNATURE
-        String sql = "INSERT INTO appointments(patient_id, doctor_id, field, appointment_time, doctor_name_at_booking, room) VALUES(?,?,?,?,?,?)"; // MODIFIED SQL
-        int appointmentId = -1;
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setLong(1, patientId);
-            pstmt.setLong(2, doctorId); 
-            pstmt.setString(3, field);
-            pstmt.setString(4, appointmentTime.format(DATE_TIME_FORMATTER));
-            pstmt.setString(5, doctorNameAtBooking);
-            pstmt.setString(6, room);
-            pstmt.executeUpdate();
-
-            ResultSet rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                appointmentId = rs.getInt(1);
-                System.out.println("Appointment added with ID: " + appointmentId);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error adding appointment: " + e.getMessage());
-        }
-        return appointmentId;
-    }
     public int addAppointment(Appointment appointments) { // MODIFIED SIGNATURE
-        String sql = "INSERT INTO appointments(patient_id, doctor_id, field, appointment_time, doctor_name_at_booking, room) VALUES(?,?,?,?,?,?)"; // MODIFIED SQL
+        String sql = "INSERT INTO appointments(patient_id, doctor_id, field, appointment_time, doctor_name, patient_name, room) VALUES(?,?,?,?,?,?)"; // MODIFIED SQL
         int appointmentId = -1;
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setLong(1, appointments.getPatientId());
-            pstmt.setLong(2, appointments.getDoctorID()); 
+            pstmt.setLong(2, appointments.getDoctorId()); 
             pstmt.setString(3, appointments.getField());
             pstmt.setString(4, appointments.getAppointmentTime().format(DATE_TIME_FORMATTER));
-            pstmt.setString(5, appointments.getDoctor());
-            pstmt.setString(6, appointments.getRoom());
+            pstmt.setString(5, appointments.getDoctorName());
+            pstmt.setString(6, appointments.getPatientName());
+            pstmt.setString(7, appointments.getRoom());
             pstmt.executeUpdate();
 
             ResultSet rs = pstmt.getGeneratedKeys();
@@ -487,14 +546,15 @@ public class DatabaseManager {
                 d.name AS doctor_name, -- ADDED
                 a.field,
                 a.appointment_time,
-                a.doctor_name_at_booking, -- ADDED
+                a.doctor_name,
+                a.patient_name, -- ADDED
                 a.room
             FROM
                 appointments a
             JOIN
-                patients p ON a.patient_id = p.id
+                patients p ON a.patient_id = p.patient_id
             JOIN
-                doctors d ON a.doctor_id = d.id -- JOIN WITH DOCTORS TABLE
+                doctors d ON a.doctor_id = d.doctor_id -- JOIN WITH DOCTORS TABLE
             ORDER BY
                 a.appointment_time
             """;
@@ -509,8 +569,9 @@ public class DatabaseManager {
                     rs.getString("field"),
                     time,
                     rs.getString("doctor_name"), // Display current doctor's name from DB
-                    rs.getString("room"),
-                    rs.getString("patient_name")
+                    rs.getString("patient_name"),
+                    rs.getString("room")
+                    
                     // Note: If your Appointment model had a doctorId field, you'd retrieve it here:
                     //rs.getInt("doctor_id")
                 ));
@@ -536,14 +597,15 @@ public class DatabaseManager {
                 d.name AS doctor_name,
                 a.field,
                 a.appointment_time,
-                a.doctor_name_at_booking,
+                a.doctor_name,
+                a.patient_name,
                 a.room
             FROM
                 appointments a
             JOIN
-                patients p ON a.patient_id = p.id
+                patients p ON a.patient_id = p.patient_id
             JOIN
-                doctors d ON a.doctor_id = d.id
+                doctors d ON a.doctor_id = d.doctor_id
             WHERE
                 a.patient_id = ?
             ORDER BY
@@ -561,8 +623,8 @@ public class DatabaseManager {
                     rs.getString("field"),
                     time,
                     rs.getString("doctor_name"), // Display current doctor's name from DB
-                    rs.getString("room"),
-                    rs.getString("patient_name")
+                    rs.getString("patient_name"),
+                    rs.getString("room")
                 ));
             }
         } catch (SQLException e) {

@@ -41,11 +41,11 @@ public class Appointment {
         return appointmentTime;
     }
 
-    public long getDoctorID() {
+    public long getDoctorId() {
         return doctor.getId();
     }
 
-    public String getDoctor() {
+    public String getDoctorName() {
         return doctor.getName();
     }
 
