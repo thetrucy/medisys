@@ -2,11 +2,14 @@ package com.medisys.controller;
 
 import java.io.IOException;
 
+import com.medisys.Main;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 
@@ -14,6 +17,10 @@ public class AppointmentOne_2_Ctrler {
 	private Stage stage;
 	private Scene scene;
 	private Parent root;
+
+	@FXML private Button homeButton;
+    @FXML private Button appointmentsButton;
+    @FXML private Button profileButton;
 
     @FXML
     public void initialize() {
@@ -35,5 +42,31 @@ public class AppointmentOne_2_Ctrler {
 		stage.setScene(scene);
 		stage.show();
 	}
-	
+
+	@FXML
+    private void onHomeButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("AppointmentOne_1");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onAppointmentsButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("Appointment");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onProfileButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("PatientProfile");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }	
 }

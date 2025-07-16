@@ -235,7 +235,7 @@ public class AppointmentOne_1_Ctrler {
     @FXML
     private void onAppointmentsButtonClick(ActionEvent event) {
         try {
-            Main.setRoot("Appointment"); // or "AppointmentBooking" if that's your FXML name
+            Main.setRoot("Appointment"); 
        } catch (Exception e) {
             e.printStackTrace();
         }
@@ -246,6 +246,16 @@ public class AppointmentOne_1_Ctrler {
         try {
             Main.setRoot("PatientProfile");
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onViewProfileButtonClick(ActionEvent event) {
+        try {
+            switchToScene2(event);
+        } catch (IOException e) {
+            System.err.println("Error switching to profile scene: " + e.getMessage());
             e.printStackTrace();
         }
     }
