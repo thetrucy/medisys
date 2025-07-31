@@ -224,34 +224,34 @@ public class AppointmentOne_1_Ctrler {
     }
 
     @FXML
-    private void onHomeButtonClick(ActionEvent event) {
-        try {
-            Main.setRoot("AppointmentOne_1");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void onHomeButtonClick(ActionEvent event) throws IOException {
+    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/AppointmentOne_1.fxml"));
+        Parent root = loader.load();
+
+        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
     }
 
     @FXML
-    private void onAppointmentsButtonClick(ActionEvent event) {
-        try {
-            Main.setRoot("UpcomingAppointments"); 
-       } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void onAppointmentsButtonClick(ActionEvent event) throws IOException {
+    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/UpcomingApm.fxml"));
+        Parent root = loader.load();
+
+        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
     }
 
     @FXML
-    private void onProfileButtonClick(ActionEvent event) {
-        try {
-            Main.setRoot("PatientProfile");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void onProfileButtonClick(ActionEvent event) throws IOException {
+    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/PatientProfile.fxml"));
+        Parent root = loader.load();
+
+        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
     }
 
     @FXML
-    private void onViewProfileButtonClick(ActionEvent event) {
+    private void onViewProfileButtonClick(ActionEvent event) throws IOException {
         try {
             switchToScene2(event);
         } catch (IOException e) {

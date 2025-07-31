@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.collections.FXCollections?>
-<?import javafx.scene.Cursor?>
-<?import javafx.scene.text.Font?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
@@ -17,15 +15,15 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
-<?import java.lang.String?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.AppointmentController">
     <left>
         <VBox alignment="TOP_CENTER" prefHeight="800.0" prefWidth="76.0" spacing="20.0" style="-fx-background-color: #378DBD;" BorderPane.alignment="CENTER">
             <children>
-                <Button fx:id="homeButton" alignment="CENTER" mnemonicParsing="false" onAction="#onHomeButtonClick" prefHeight="40.0" prefWidth="150.0" style="-fx-cursor:hand; -fx-background-color: transparent;">
+                <Button fx:id="homeButton" alignment="CENTER" mnemonicParsing="false" onAction="#goBackToAppointmentOne" prefHeight="40.0" prefWidth="150.0" style="-fx-cursor:hand; -fx-background-color: transparent;">
                     <graphic>
                         <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
                             <image>
@@ -70,12 +68,12 @@
                 <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #b3e0f2; -fx-padding: 10;" />
                 <HBox spacing="20.0">
                     <children>
-                        <RadioButton fx:id="radioSelf" selected="true" text="Đặt lịch cho bản thân" onAction="#onRadioChange">
+                        <RadioButton fx:id="radioSelf" onAction="#onRadioChange" selected="true" text="Đặt lịch cho bản thân">
                             <toggleGroup>
                                 <ToggleGroup fx:id="appointmentGroup" />
                             </toggleGroup>
                         </RadioButton>
-                        <RadioButton fx:id="radioOther" text="Đặt lịch cho người khác" toggleGroup="$appointmentGroup" onAction="#onRadioChange" />
+                        <RadioButton fx:id="radioOther" onAction="#onRadioChange" text="Đặt lịch cho người khác" toggleGroup="$appointmentGroup" />
                     </children>
                 </HBox>
                 <!-- Form for booking for yourself -->
@@ -109,6 +107,14 @@
                                 <Label text="Đặt giờ thăm khám:" GridPane.rowIndex="5" />
                                 <ComboBox fx:id="appointmentTimeSelf" promptText="Chọn giờ" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                             </children>
+                     <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                     </rowConstraints>
                         </GridPane>
                         <HBox alignment="CENTER_RIGHT" spacing="10.0">
                             <children>
@@ -119,7 +125,7 @@
                     </children>
                 </VBox>
                 <!-- Form for booking for others -->
-                <VBox fx:id="otherBookingForm" spacing="15.0" visible="false" managed="false">
+                <VBox fx:id="otherBookingForm" managed="false" spacing="15.0" visible="false">
                     <children>
                         <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Thông tin bệnh nhân" />
                         <GridPane hgap="20.0" vgap="15.0">
@@ -145,6 +151,12 @@
                                     </items>
                                 </ComboBox>
                             </children>
+                     <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                     </rowConstraints>
                         </GridPane>
                         <GridPane hgap="20.0" vgap="15.0">
                             <columnConstraints>
@@ -176,6 +188,14 @@
                                 <Label text="Đặt giờ thăm khám:" GridPane.rowIndex="5" />
                                 <ComboBox fx:id="appointmentTimeOther" promptText="Chọn giờ" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                             </children>
+                     <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                     </rowConstraints>
                         </GridPane>
                         <HBox alignment="CENTER_RIGHT" spacing="10.0">
                             <children>

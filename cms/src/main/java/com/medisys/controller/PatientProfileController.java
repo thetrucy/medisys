@@ -1,13 +1,21 @@
 package com.medisys.controller;
 
 import com.medisys.util.DatabaseManager;
+
+import java.io.IOException;
+
 import com.medisys.Main;
 import com.medisys.model.Patient;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
@@ -174,30 +182,31 @@ public class PatientProfileController {
             
         }
     }
+    
     @FXML
-    private void onHomeButtonClick(ActionEvent event) {
-        try {
-            Main.setRoot("AppointmentOne_1");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void onHomeButtonClick(ActionEvent event) throws IOException {
+    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/AppointmentOne_1.fxml"));
+        Parent root = loader.load();
+
+        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
     }
 
     @FXML
-    private void onAppointmentsButtonClick(ActionEvent event) {
-        try {
-            Main.setRoot("UpcomingAppointments"); 
-       } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void onAppointmentsButtonClick(ActionEvent event) throws IOException {
+    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/UpcomingApm.fxml"));
+        Parent root = loader.load();
+
+        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
     }
 
     @FXML
-    private void onProfileButtonClick(ActionEvent event) {
-        try {
-            Main.setRoot("PatientProfile");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void onProfileButtonClick(ActionEvent event) throws IOException {
+    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/PatientProfile.fxml"));
+        Parent root = loader.load();
+
+        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
     }
 }
