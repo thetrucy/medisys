@@ -28,19 +28,19 @@ public class AppointmentOne_2_Ctrler {
     }
     
     public void switchToScene1(ActionEvent event) throws IOException {
-		root = FXMLLoader.load(getClass().getResource("/com/medisys/view/AppointmentOne_1.fxml"));
-		stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-		scene = new Scene(root);
-		stage.setScene(scene);
-		stage.show();
+    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/AppointmentOne_1.fxml"));
+        Parent root = loader.load();
+
+        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
 	}
 	
 	public void switchToScene2(ActionEvent event) throws IOException {
-		root = FXMLLoader.load(getClass().getResource("/com/medisys/view/AppointmentOne_2.fxml"));
-		stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-		scene = new Scene(root);
-		stage.setScene(scene);
-		stage.show();
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/AppointmentOne_2.fxml"));
+        Parent root = loader.load();
+
+        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
 	}
 
 	@FXML

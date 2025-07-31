@@ -635,7 +635,7 @@ public class AppointmentController implements Initializable {
     }
     
     @FXML
-    private void goBackToAppointmentOne(ActionEvent event) throws IOException {
+    private void onHomeButtonClick(ActionEvent event) throws IOException {
     	FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/AppointmentOne_1.fxml"));
         Parent root = loader.load();
 

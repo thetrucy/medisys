@@ -23,7 +23,7 @@
     <left>
         <VBox alignment="TOP_CENTER" prefHeight="800.0" prefWidth="76.0" spacing="20.0" style="-fx-background-color: #378DBD;" BorderPane.alignment="CENTER">
             <children>
-                <Button fx:id="homeButton" alignment="CENTER" mnemonicParsing="false" onAction="#goBackToAppointmentOne" prefHeight="40.0" prefWidth="150.0" style="-fx-cursor:hand; -fx-background-color: transparent;">
+                <Button fx:id="homeButton" alignment="CENTER" mnemonicParsing="false" onAction="#onHomeButtonClick" prefHeight="40.0" prefWidth="150.0" style="-fx-cursor:hand; -fx-background-color: transparent;">
                     <graphic>
                         <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
                             <image>
