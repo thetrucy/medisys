@@ -55,8 +55,8 @@ public class AppointmentOne_2_Ctrler {
     @FXML
     private void onAppointmentsButtonClick(ActionEvent event) {
         try {
-            Main.setRoot("Appointment");
-        } catch (Exception e) {
+            Main.setRoot("UpcomingAppointments"); 
+       } catch (Exception e) {
             e.printStackTrace();
         }
     }

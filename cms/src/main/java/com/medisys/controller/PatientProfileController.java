@@ -186,7 +186,7 @@ public class PatientProfileController {
     @FXML
     private void onAppointmentsButtonClick(ActionEvent event) {
         try {
-            Main.setRoot("Appointment"); 
+            Main.setRoot("UpcomingAppointments"); 
        } catch (Exception e) {
             e.printStackTrace();
         }

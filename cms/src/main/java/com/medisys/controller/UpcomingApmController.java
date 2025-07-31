@@ -1,8 +1,10 @@
 package com.medisys.controller;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.medisys.Main;
 import com.medisys.model.UpcomingAppointment;
 
 import javafx.fxml.FXML;
@@ -12,6 +14,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 
 public class UpcomingApmController implements Initializable {
     @FXML
@@ -60,4 +63,31 @@ public class UpcomingApmController implements Initializable {
             }
         });
     }
+        @FXML
+    private void onHomeButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("AppointmentOne_1");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onAppointmentsButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("UpcomingAppointments"); 
+       } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onProfileButtonClick(ActionEvent event) {
+        try {
+            Main.setRoot("PatientProfile");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -154,6 +154,7 @@ public class DatabaseManager {
             System.out.println("Appointments file is empty. Populating with initial data...");
             populateInitialAppointmentsToFile();
         }
+        saveIdCounters();
         System.out.println("------Validate patients------");
         List<Patient> initialPatients = getAllPatients();
         for(Patient patient : initialPatients) {
