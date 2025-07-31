@@ -23,45 +23,52 @@
 
 <BorderPane prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.AppointmentController">
     <left>
-        <VBox alignment="TOP_CENTER" prefHeight="800.0" prefWidth="76.0" spacing="20.0" style="-fx-background-color: #378DBD;" BorderPane.alignment="CENTER">
-            <children>
-                <Button fx:id="homeButton" alignment="CENTER" mnemonicParsing="false" onAction="#onHomeButtonClick" prefHeight="40.0" prefWidth="150.0" style="-fx-cursor:hand; -fx-background-color: transparent;">
-                    <graphic>
-                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                                <Image url="@icons/home.png" />
-                            </image>
-                        </ImageView>
-                    </graphic>
-                    <font>
-                        <Font name="Arial Bold" size="14.0" />
-                    </font>
-                </Button>
-                <Button fx:id="appointmentsButton" alignment="CENTER" mnemonicParsing="false" onAction="#onAppointmentsButtonClick" prefHeight="40.0" prefWidth="150.0" style="-fx-cursor:hand; -fx-background-color: transparent;">
-                    <graphic>
-                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                                <Image url="@icons/calendar.png" />
-                            </image>
-                        </ImageView>
-                    </graphic>
-                    <font>
-                        <Font name="Arial Bold" size="14.0" />
-                    </font>
-                </Button>
-                <Button fx:id="profileButton" alignment="CENTER" mnemonicParsing="false" onAction="#onProfileButtonClick" prefHeight="40.0" prefWidth="150.0" style="-fx-cursor:hand; -fx-background-color: transparent;">
-                    <graphic>
-                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                                <Image url="@icons/user.png" />
-                            </image>
-                        </ImageView>
-                    </graphic>
-                    <font>
-                        <Font name="Arial Bold" size="14.0" />
-                    </font>
-                </Button>
-            </children>
+        <VBox alignment="TOP_CENTER" prefWidth="180.0" spacing="20.0" style="-fx-background-color: #378DBD;" BorderPane.alignment="CENTER">
+            <Button fx:id="homeButton" alignment="CENTER" mnemonicParsing="false" onAction="#onHomeButtonClick" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: transparent;">
+                <graphic>
+                    <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@icons/home.png" />
+                        </image>
+                    </ImageView>
+                </graphic>
+                <font>
+                    <Font name="Arial Bold" size="14.0" />
+                </font>
+                <cursor>
+                    <Cursor fx:constant="HAND" />
+                </cursor>
+            </Button>
+            <Button fx:id="appointmentsButton" alignment="CENTER" mnemonicParsing="false" onAction="#onAppointmentsButtonClick" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: transparent;">
+                <graphic>
+                    <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@icons/calendar.png" />
+                        </image>
+                    </ImageView>
+                </graphic>
+                <font>
+                    <Font name="Arial Bold" size="14.0" />
+                </font>
+                <cursor>
+                    <Cursor fx:constant="HAND" />
+                </cursor>
+            </Button>
+            <Button fx:id="profileButton" alignment="CENTER" mnemonicParsing="false" onAction="#onProfileButtonClick" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: transparent;">
+                <graphic>
+                    <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@icons/user.png" />
+                        </image>
+                    </ImageView>
+                </graphic>
+                <font>
+                    <Font name="Arial Bold" size="14.0" />
+                </font>
+                <cursor>
+                    <Cursor fx:constant="HAND" />
+                </cursor>
+            </Button>
         </VBox>
     </left>
     <center>
