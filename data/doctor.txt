@@ -1,0 +1,18 @@
+1|71111111|Dr. John Smith|General Practice|0901234567|john.smith@medisys.com|Room 1
+2|71111222|Dr. Jane Doe|Pediatrics|0907654321|jane.doe@medisys.com|Room 2
+3|71111333|Dr. Robert Johnson|Cardiology|0912345678|robert.j@medisys.com|Room 3
+4|72222111|Dr. Mary Lee|Dermatology|0918765432|mary.l@medisys.com|Room 4
+5|72222223|Dr. David Kim|Orthopedics|0923456789|david.k@medisys.com|Room 5
+6|71113222|Dr. Sarah Chen|Internal Medicine|0929876543|sarah.c@medisys.com|Room 6
+1|71111111|Dr. John Smith|General Practice|0901234567|john.smith@medisys.com|Room 1
+2|71111222|Dr. Jane Doe|Pediatrics|0907654321|jane.doe@medisys.com|Room 2
+3|71111333|Dr. Robert Johnson|Cardiology|0912345678|robert.j@medisys.com|Room 3
+4|72222111|Dr. Mary Lee|Dermatology|0918765432|mary.l@medisys.com|Room 4
+5|72222223|Dr. David Kim|Orthopedics|0923456789|david.k@medisys.com|Room 5
+6|71113222|Dr. Sarah Chen|Internal Medicine|0929876543|sarah.c@medisys.com|Room 6
+1|71111111|Dr. John Smith|General Practice|0901234567|john.smith@medisys.com|Room 1
+2|71111222|Dr. Jane Doe|Pediatrics|0907654321|jane.doe@medisys.com|Room 2
+3|71111333|Dr. Robert Johnson|Cardiology|0912345678|robert.j@medisys.com|Room 3
+4|72222111|Dr. Mary Lee|Dermatology|0918765432|mary.l@medisys.com|Room 4
+5|72222223|Dr. David Kim|Orthopedics|0923456789|david.k@medisys.com|Room 5
+6|71113222|Dr. Sarah Chen|Internal Medicine|0929876543|sarah.c@medisys.com|Room 6

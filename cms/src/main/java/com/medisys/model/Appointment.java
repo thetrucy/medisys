@@ -11,6 +11,11 @@ public class Appointment {
     private LocalDateTime appointmentTime;
 
     // Constructors
+    public Appointment(long doctorId, long patientId, LocalDateTime appointmentTime) {
+        this.patient = new Patient(patientId, "", "", "");
+        this.doctor = new Doctor(doctorId, "", "", "", "", "");
+        this.appointmentTime = appointmentTime;
+    }
     public Appointment(int id, long doctorId, long patientId, String field, LocalDateTime appointmentTime, String doctorName, String patientName, String room) {
         this.id = id;
         this.patient = new Patient(patientId, patientName, "", "");

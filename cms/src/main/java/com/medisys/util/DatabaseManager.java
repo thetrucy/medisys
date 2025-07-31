@@ -4,24 +4,43 @@ package com.medisys.util;
 import com.medisys.model.Appointment;
 import com.medisys.model.Patient;
 import com.medisys.model.Doctor;
-import java.sql.*;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DatabaseManager {
 
     private static DatabaseManager instance;
-    private static final String DATABASE_URL = "jdbc:sqlite:medical_cms.db"; // Local database file
+    private static final String DATA_DIR = "data";
+    private static final String DATA_PATIENTS = DATA_DIR + "/patient.txt";
+    private static final String DATA_DOCTORS = DATA_DIR + "/doctor.txt";
+    private static final String DATA_APPOINTMENTS = DATA_DIR + "/appointment.txt";
+    private static final String DATA_ID_COUNTER = DATA_DIR + "/id_counter.txt";
+
+    private static final String DELIMITER = "|";
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    /*----------------------------ID--------------------- */
+    private static AtomicInteger patientIdCounter = new AtomicInteger(0);//-> thread-safe
+    private static AtomicInteger doctorIdCounter = new AtomicInteger(0);
+    private static AtomicInteger appointmentIdCounter = new AtomicInteger(0);
+
     /**
-     * Establishes a connection to the SQLite database.
-     * @return A Connection object.
+     * Initializes the file-based storage system.
      */
     private DatabaseManager() {
-        createTables();
+        initializeFileStorage();
+        loadIdCounters();
+        initializeData(); // Initialize with sample data if files are empty
     }
     public static synchronized DatabaseManager getInstance() {
     if (instance == null) {
@@ -29,143 +48,161 @@ public class DatabaseManager {
     }
     return instance;
     }
-    private Connection connect() {
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(DATABASE_URL);
-        } catch (SQLException e) {
-            System.err.println("Error connecting to database: " + e.getMessage());
+    private void initializeFileStorage() {
+        File dataDir = new File(DATA_DIR);
+        if (!dataDir.exists()) {
+            dataDir.mkdirs(); // Create the 'data' directory
+            System.out.println("Created data directory: " + DATA_DIR);
         }
-        return conn;
+        createFileIfNotExists(DATA_PATIENTS);
+        createFileIfNotExists(DATA_DOCTORS);
+        createFileIfNotExists(DATA_APPOINTMENTS);
+        createFileIfNotExists(DATA_ID_COUNTER);
     }
-
+    private void createFileIfNotExists(String filePath) {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+                System.out.println("Created data file: " + filePath);
+            } catch (IOException e) {
+                System.err.println("Error creating file " + filePath + ": " + e.getMessage());
+            }
+        }
+    }
     /**
-     * Creates the patients and appointments tables if they don't exist.
+     * Loads the last used IDs from the id_counters.txt file.
+     * If the file is empty or corrupted, counters are initialized to 0.
+     * Also checks existing data files to ensure counters are not lower than max existing IDs.
      */
-    public void createTables() {
-        String createPatientsTableSQL = """
-            CREATE TABLE IF NOT EXISTS patients (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,   -- Database's internal ID
-                username TEXT NOT NULL UNIQUE,            -- Your unique username
-                password TEXT NOT NULL,                   -- Hashed password
-                patient_id INTEGER NOT NULL UNIQUE,        -- Your unique 12-digit ID
-                name TEXT,
-                phone TEXT,
-                dob TEXT
-            );
-            """;
-
-        String createDoctorsTableSQL = """
-            CREATE TABLE IF NOT EXISTS doctors (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                doctor_id INTEGER NOT NULL UNIQUE,
-                name TEXT NOT NULL,
-                faculty TEXT NOT NULL,
-                phone TEXT NOT NULL UNIQUE,
-                email TEXT UNIQUE,
-                room TEXT
-            );
-            """;
-
-        String createAppointmentsTableSQL = """
-            CREATE TABLE IF NOT EXISTS appointments (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                patient_id INTEGER NOT NULL,
-                doctor_id INTEGER NOT NULL,
-                field TEXT NOT NULL,
-                appointment_time TEXT NOT NULL,
-                doctor_name TEXT NOT NULL,
-                patient_name TEXT NOT NULL,
-                room TEXT NOT NULL,
-                FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-                FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE RESTRICT
-            );
-            """;
-
-        try (Connection conn = connect();
-            Statement stmt = conn.createStatement()) {
-            // Create tables
-            stmt.execute(createPatientsTableSQL);
-            stmt.execute(createDoctorsTableSQL);
-            stmt.execute(createAppointmentsTableSQL);
-            System.out.println("Tables created successfully or already exist.");
-
-            // Check if doctors table is empty and pre-populate
-            if (isTableEmpty("doctors", conn)) {
-                System.out.println("Doctors table is empty. Populating with initial data...");
-                populateInitialDoctors(conn);
+    private void loadIdCounters() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_ID_COUNTER))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("=");
+                if (parts.length == 2) {
+                    String type = parts[0].trim();
+                    int lastId = Integer.parseInt(parts[1].trim());
+                    switch (type) {
+                        case "patient": patientIdCounter.set(lastId); break;
+                        case "doctor": doctorIdCounter.set(lastId); break;
+                        case "appointment": appointmentIdCounter.set(lastId); break;
+                    }
+                }
             }
-            // Check if doctors table is empty and pre-populate
-            if (isTableEmpty("patients", conn)) {
-                System.out.println("Patients table is empty. Populating with initial data...");
-                populateInitialPatients(conn);
-            }
-            if (isTableEmpty("appointments", conn)) {
-                System.out.println("Appointments table is empty. Populating with initial data...");
-                populateInitialAppointments(conn);
-            }
-            System.out.println("------Validate patients------");
-            List<Patient> initialPatients = getAllPatients();
-            for(Patient patient:initialPatients){
-                System.out.println(patient.getUsername());
-            }
-        } catch (SQLException e) {
-            System.err.println("Error creating tables or populating initial data: " + e.getMessage());
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Warning: Error loading ID counters or file empty. Initializing to 0. " + e.getMessage());
+            // If file is empty or corrupted, counters remain 0 or are set to 0.
         }
+
+        // Ensure counters are never lower than the max ID already in the data files
+        patientIdCounter.set(Math.max(patientIdCounter.get(), getMaxIdFromFile(DATA_PATIENTS, 0)));
+        doctorIdCounter.set(Math.max(doctorIdCounter.get(), getMaxIdFromFile(DATA_DOCTORS, 0)));
+        appointmentIdCounter.set(Math.max(appointmentIdCounter.get(), getMaxIdFromFile(DATA_APPOINTMENTS, 0)));
+        
+        saveIdCounters(); // Save the (potentially updated) ID counters
     }
 
+    private int getMaxIdFromFile(String filePath, int idIndex) {
+        int maxId = 0;
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER); // Split by delimiter
+                if (parts.length > idIndex) {
+                    try {
+                        int currentId = Integer.parseInt(parts[idIndex].trim());
+                        if (currentId > maxId) {
+                            maxId = currentId;
+                        }
+                    } catch (NumberFormatException e) {
+                        // Ignore lines with malformed IDs
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading max ID from " + filePath + ": " + e.getMessage());
+        }
+        return maxId;
+    }
     /**
-     * Checks if a given table is empty.
-     * @param tableName The name of the table to check.
-     * @param conn The database connection.
-     * @return true if the table is empty, false otherwise.
-     * @throws SQLException if a database access error occurs.
+     * Saves ID counters to the id_counter.txt file.
      */
-    private boolean isTableEmpty(String tableName, Connection conn) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM " + tableName;
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next()) {
-                return rs.getInt(1) == 0;
-            }
+        private void saveIdCounters() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_ID_COUNTER))) {
+            writer.write("patient=" + patientIdCounter.get());
+            writer.newLine();
+            writer.write("doctor=" + doctorIdCounter.get());
+            writer.newLine();
+            writer.write("appointment=" + appointmentIdCounter.get());
+            writer.newLine();
+        } catch (IOException e) {
+            System.err.println("Error saving ID counters: " + e.getMessage());
         }
-        return true; // Should not happen if table exists, but as a fallback
     }
-    private void populateInitialPatients(Connection conn) {
+    public void initializeData() {
+        // Check if files are empty and pre-populate with initial data
+        if (isFileEmpty(DATA_DOCTORS)) {
+            System.out.println("Doctors file is empty. Populating with initial data...");
+            populateInitialDoctorsToFile();
+        }
+        if (isFileEmpty(DATA_PATIENTS)) {
+            System.out.println("Patients file is empty. Populating with initial data...");
+            populateInitialPatientsToFile();
+        }
+        if (isFileEmpty(DATA_APPOINTMENTS)) {
+            System.out.println("Appointments file is empty. Populating with initial data...");
+            populateInitialAppointmentsToFile();
+        }
+        System.out.println("------Validate patients------");
+        List<Patient> initialPatients = getAllPatients();
+        for(Patient patient : initialPatients) {
+            System.out.println(patient.getUsername());
+        }
+    }
+
+    private boolean isFileEmpty(String filePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            return reader.readLine() == null;
+        } catch (IOException e) {
+            System.err.println("Error checking if file is empty: " + filePath + " - " + e.getMessage());
+            return true; // Assume empty if can't read
+        }
+    }
+
+
+    private void populateInitialPatientsToFile() {
         // You can use a hardcoded list of patients here
         List<Patient> initialPatients = new ArrayList<>();
         initialPatients.add(new Patient("apple","123123A@",79123123123L,"John Doe", "123-456-7890", "1990-01-01"));
         initialPatients.add(new Patient("banana","123123T@",7912341234L,"Jane Smith", "234-567-8901", "1985-05-15"));
-
-        // SQL to insert patients
-        String sql = "INSERT OR IGNORE INTO Patients(username, password, patient_id, name, phone, dob) VALUES(?, ?, ?, ?, ?, ?)";
         
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_PATIENTS, true))) {
             for (Patient patient : initialPatients) {
-                pstmt.setString(1, patient.getUsername());
-                pstmt.setString(2, patient.getPassword());
-                pstmt.setLong(3, patient.getId());
-                pstmt.setString(4, patient.getName());
-                pstmt.setString(5, patient.getPhone());
-                pstmt.setString(6, patient.getDOB());
-
-                pstmt.executeUpdate();
+                int newId = patientIdCounter.incrementAndGet();
+                // Format: id|username|password|patient_id|name|phone|dob
+                String patientLine = String.join(DELIMITER,
+                    String.valueOf(newId),
+                    patient.getUsername(),
+                    patient.getPassword(),
+                    String.valueOf(patient.getId()),
+                    patient.getName(),
+                    patient.getPhone(),
+                    patient.getDOB()
+                );
+                writer.write(patientLine);
+                writer.newLine();
             }
-            System.out.println("Initial patients populated.");
-
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            saveIdCounters();
+            System.out.println("Initial patients populated to file.");
+        } catch (IOException e) {
+            System.err.println("Error populating initial patients: " + e.getMessage());
         }
     }
-        /**
-     * Populates the doctors table with initial data.
-     * This method is called only if the doctors table is empty.
-     * @param conn The database connection.
-     */
-    private void populateInitialDoctors(Connection conn) {
+
+    private void populateInitialDoctorsToFile() {
         List<Doctor> initialDoctors = new ArrayList<>();
-        // Use your Doctor constructor: (name, faculty, phone, email)
+        // Use your Doctor constructor: (doctor_id, name, faculty, phone, email, room)
         initialDoctors.add(new Doctor(71111111,"Dr. John Smith", "General Practice", "0901234567", "john.smith@medisys.com", "Room 1"));
         initialDoctors.add(new Doctor(71111222,"Dr. Jane Doe", "Pediatrics", "0907654321", "jane.doe@medisys.com", "Room 2"));
         initialDoctors.add(new Doctor(71111333,"Dr. Robert Johnson", "Cardiology", "0912345678", "robert.j@medisys.com", "Room 3"));
@@ -173,46 +210,33 @@ public class DatabaseManager {
         initialDoctors.add(new Doctor(72222223,"Dr. David Kim", "Orthopedics", "0923456789", "david.k@medisys.com", "Room 5"));
         initialDoctors.add(new Doctor(71113222,"Dr. Sarah Chen", "Internal Medicine", "0929876543", "sarah.c@medisys.com", "Room 6"));
 
-        // SQL should use 'faculty' as the column name in the DB
-        String sql = "INSERT INTO doctors(doctor_id, name, faculty, phone, email, room) VALUES(?,?,?,?,?,?)";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            conn.setAutoCommit(false);
-
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_DOCTORS, true))) {
             for (Doctor doctor : initialDoctors) {
-                pstmt.setLong(1, doctor.getId());
-                pstmt.setString(2, doctor.getName());
-                pstmt.setString(3, doctor.getFaculty()); 
-                pstmt.setString(4, doctor.getPhone());
-                pstmt.setString(5, doctor.getEmail());
-                pstmt.setString(6, doctor.getRoom());
-                pstmt.addBatch();
+                int newId = doctorIdCounter.incrementAndGet();
+                // Format: id|doctor_id|name|faculty|phone|email|room
+                String doctorLine = String.join(DELIMITER,
+                    String.valueOf(newId),
+                    String.valueOf(doctor.getId()),
+                    doctor.getName(),
+                    doctor.getFaculty(),
+                    doctor.getPhone(),
+                    doctor.getEmail(),
+                    doctor.getRoom()
+                );
+                writer.write(doctorLine);
+                writer.newLine();
             }
-            pstmt.executeBatch();
-            conn.commit();
-            System.out.println("Initial doctors populated successfully.");
-        } catch (SQLException e) {
+            saveIdCounters();
+            System.out.println("Initial doctors populated to file successfully.");
+        } catch (IOException e) {
             System.err.println("Error populating initial doctors: " + e.getMessage());
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (SQLException rb_e) {
-                System.err.println("Rollback failed: " + rb_e.getMessage());
-            }
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                System.err.println("Error resetting auto-commit: " + e.getMessage());
-            }
         }
     }
-    public void populateInitialAppointments(Connection conn) {
-        // 1. Get a demo Patient and Doctor from the database
-        Patient patient = getPatientByUsername("apple"); 
-        Doctor doctor = getDoctorById(71111111L); 
+
+    private void populateInitialAppointmentsToFile() {
+        // 1. Get a demo Patient and Doctor from the files
+        Patient patient = getPatientByUsername("apple");
+        Doctor doctor = getDoctorById(71111111L);
 
         if (patient == null || doctor == null) {
             System.err.println("Cannot populate appointments: demo patient or doctor not found.");
@@ -222,14 +246,13 @@ public class DatabaseManager {
         List<Appointment> initialAppointments = new ArrayList<>();
         
         // 2. Create the Appointment objects using the IDs from the fetched objects
-
         LocalDateTime appointmentTime1 = LocalDateTime.of(2025,07,12,15,0,0);
         LocalDateTime appointmentTime2 = LocalDateTime.of(2025,07,12,9,30,0);
         
         initialAppointments.add(new Appointment(
             -1, // Placeholder for the auto-incrementing ID
-            patient.getId(), // Get patient's database ID
-            doctor.getId(),  // Get doctor's database ID
+            doctor.getId(),  // Get doctor's ID
+            patient.getId(), // Get patient's ID
             doctor.getFaculty(),
             appointmentTime1,
             doctor.getName(),
@@ -237,198 +260,310 @@ public class DatabaseManager {
             doctor.getRoom()
         ));
         initialAppointments.add(new Appointment(
-        -1,
-        patient.getId(),
-        doctor.getId(),
-        doctor.getFaculty(),
-        appointmentTime2,
-        doctor.getName(),
-        patient.getName(),
-        doctor.getRoom()
-    ));
-        // SQL should use 'faculty' as the column name in the DB
-        String sql = "INSERT INTO appointments(patient_id, doctor_id, field, appointment_time, doctor_name, patient_name, room) VALUES(?, ?, ?, ?, ?, ?, ?)";
+            -1,
+            doctor.getId(),
+            patient.getId(),
+            doctor.getFaculty(),
+            appointmentTime2,
+            doctor.getName(),
+            patient.getName(),
+            doctor.getRoom()
+        ));
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            conn.setAutoCommit(false); // Start transaction
-
-        for (Appointment appointment : initialAppointments) {
-            pstmt.setLong(1, appointment.getPatientId());
-            pstmt.setLong(2, appointment.getDoctorId());
-            pstmt.setString(3, appointment.getField());
-            pstmt.setString(4, appointment.getAppointmentTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-            pstmt.setString(5, appointment.getDoctorName());
-            pstmt.setString(6, appointment.getPatientName());
-            pstmt.setString(7, appointment.getRoom());
-            pstmt.addBatch();
-        }
-            pstmt.executeBatch();
-            conn.commit();
-            System.out.println("Initial appointments populated successfully.");
-        } catch (SQLException e) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_APPOINTMENTS, true))) {
+            for (Appointment appointment : initialAppointments) {
+                int newId = appointmentIdCounter.incrementAndGet();
+                // Format: id|doctor_id|patient_id|field|doctor_name|patient_name|appointment_time|room
+                String appointmentLine = String.join(DELIMITER,
+                    String.valueOf(newId),
+                    String.valueOf(appointment.getDoctorId()),
+                    String.valueOf(appointment.getPatientId()),
+                    appointment.getField(),
+                    appointment.getDoctorName(),
+                    appointment.getPatientName(),
+                    appointment.getAppointmentTime().format(DATE_TIME_FORMATTER),
+                    appointment.getRoom()
+                );
+                writer.write(appointmentLine);
+                writer.newLine();
+            }
+            saveIdCounters();
+            System.out.println("Initial appointments populated to file successfully.");
+        } catch (IOException e) {
             System.err.println("Error populating initial appointments: " + e.getMessage());
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (SQLException rb_e) {
-                System.err.println("Rollback failed: " + rb_e.getMessage());
-            }
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                System.err.println("Error resetting auto-commit: " + e.getMessage());
-            }
         }
     }
-    public int addDoctor(Doctor doctor) {
-        String sql = "INSERT INTO doctors(doctor_id, name, faculty, phone, email, room) VALUES(?,?,?,?,?,?)";
-        int doctorId = -1;
-        try (Connection conn = connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                pstmt.setLong(1, doctor.getId());
-                pstmt.setString(2, doctor.getName());
-                pstmt.setString(3, doctor.getFaculty()); 
-                pstmt.setString(4, doctor.getPhone());
-                pstmt.setString(5, doctor.getEmail());
-                pstmt.setString(6, doctor.getRoom());
-                pstmt.executeUpdate();
 
-            ResultSet rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                doctorId = rs.getInt(1);
-                System.out.println("Doctor added with ID: " + doctorId);
-            }
-        } catch (SQLException e) {
-            if (e.getMessage().contains("UNIQUE constraint failed")) {
-                System.err.println("Error: A doctor with this phone or email already exists.");
-            } else {
-                System.err.println("Error adding doctor: " + e.getMessage());
-            }
+    public int addDoctor(Doctor doctor) {
+        int newId = doctorIdCounter.incrementAndGet(); // Get next ID
+        // Format patient data into a single line, delimited by '|'
+        String doctorLine = String.join(DELIMITER,
+            String.valueOf(newId),
+            String.valueOf(doctor.getId()),
+            doctor.getName(),
+            doctor.getFaculty(),
+            doctor.getPhone(),
+            doctor.getEmail(),
+            doctor.getRoom()
+        );
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_DOCTORS, true))) {
+            writer.write(doctorLine);
+            writer.newLine();
+            saveIdCounters(); // Persist ID counter
+            System.out.println("doctor added to file: " + doctor.getName() + " with ID: " + newId);
+            return newId;
+        } catch (IOException e) {
+            System.err.println("Error adding doctor to file: " + e.getMessage());
+            doctorIdCounter.decrementAndGet(); // Rollback ID if write fails
+            return -1;
         }
-        return doctorId;
     }
+
     public List<Doctor> getAllDoctors() {
         List<Doctor> doctors = new ArrayList<>();
-        String sql = "SELECT id, doctor_id, name, faculty, phone, email, room FROM doctors";
-        try (Connection conn = connect();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                doctors.add(new Doctor(
-                    rs.getInt("id"),
-                    rs.getLong("doctor_id"),
-                    rs.getString("name"),
-                    rs.getString("faculty"),
-                    rs.getString("phone"),
-                    rs.getString("email"),
-                    rs.getString("room")
-                ));
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_DOCTORS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                // Ensure enough parts for a complete doctor record
+                if (parts.length >= 7) {
+                    try {
+                        // Reconstruct Doctor object (id, doctor_id, name, faculty, phone, email, room)
+                        doctors.add(new Doctor(
+                            Integer.parseInt(parts[0].trim()),    // id
+                            Long.parseLong(parts[1].trim()),      // doctor_id
+                            parts[2].trim(),                      // name
+                            parts[3].trim(),                      // faculty
+                            parts[4].trim(),                      // phone
+                            parts[5].trim(),                      // email
+                            parts[6].trim()                       // room
+                        ));
+                    }
+                    catch (NumberFormatException e) {
+                        System.err.println("Error parsing doctor data in file: " + line + " - " + e.getMessage());
+                    }
+                }
             }
-        } catch (SQLException e) {
-            System.err.println("Error retrieving doctors: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error reading doctors file: " + e.getMessage());
         }
         return doctors;
     }
       
     public Doctor getDoctorById(long doctorId) {
-        String sql = "SELECT id, doctor_id, name, faculty, phone, email, room FROM doctors WHERE doctor_id = ?";
-        try (Connection conn = connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, doctorId);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return new Doctor(
-                    rs.getInt("id"),
-                    rs.getLong("doctor_id"),
-                    rs.getString("name"),
-                    rs.getString("faculty"),
-                    rs.getString("phone"),
-                    rs.getString("email"),
-                    rs.getString("room")
-                );
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_DOCTORS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                // Ensure enough parts and doctor_id matches
+                if (parts.length >= 7 && parts[1].trim().equals(String.valueOf(doctorId))) {
+                    try {
+                        // Reconstruct Doctor object (id, doctor_id, name, faculty, phone, email, room)
+                        return new Doctor(
+                            Integer.parseInt(parts[0].trim()),    // id
+                            Long.parseLong(parts[1].trim()),      // doctor_id
+                            parts[2].trim(),                      // name
+                            parts[3].trim(),                      // faculty
+                            parts[4].trim(),                      // phone
+                            parts[5].trim(),                      // email
+                            parts[6].trim()                       // room
+                        );
+                    }
+                    catch (NumberFormatException e) {
+                        System.err.println("Error parsing doctor data in file: " + line + " - " + e.getMessage());
+                    }
+                }
             }
-        } catch (SQLException e) {
+        }
+        catch (IOException e) {
             System.err.println("Error retrieving doctor by ID " + doctorId + ": " + e.getMessage());
         }
         return null;
     }
+    /**
+     * Updates an existing doctor's information using file-based I/O.
+     * @param doctor The Doctor object with updated information (doctor_id must match an existing doctor).
+     * @return True if update was successful, false otherwise.
+     */
     public boolean updateDoctor(Doctor doctor) {
-        String sql = "UPDATE doctors SET name = ?, faculty = ?, phone = ?, email = ?, room = ? WHERE doctor_id = ?";
-        try (Connection conn = connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, doctor.getName());
-            pstmt.setString(2, doctor.getFaculty());
-            pstmt.setString(3, doctor.getPhone());
-            pstmt.setString(4, doctor.getEmail());
-            pstmt.setString(5, doctor.getRoom());
-            pstmt.setLong(6, doctor.getId());
-            int rowsAffected = pstmt.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Doctor ID " + doctor.getId() + " updated successfully.");
-                return true;
-            } else {
-                System.out.println("No doctor found with ID: " + doctor.getId() + " to update.");
-                return false;
+        List<String> lines = new ArrayList<>();
+        boolean doctorFound = false;
+        boolean phoneConflict = false;
+        boolean emailConflict = false;
+        
+        // First, check for phone and email conflicts (excluding the doctor being updated)
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_DOCTORS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                if (parts.length >= 7) {
+                    long currentDoctorId = Long.parseLong(parts[1].trim());
+                    String currentPhone = parts[4].trim();
+                    String currentEmail = parts[5].trim();
+                    // Check if another doctor has the same phone or email
+                    if (currentDoctorId != doctor.getId()) {
+                        if (currentPhone.equals(doctor.getPhone())) {
+                            phoneConflict = true;
+                            break;
+                        }
+                        if (currentEmail.equals(doctor.getEmail())) {
+                            emailConflict = true;
+                            break;
+                        }
+                    }
+                }
             }
-        } catch (SQLException e) {
-            if (e.getMessage().contains("UNIQUE constraint failed")) {
-                System.err.println("Error: Cannot update. Another doctor already has this phone or email.");
-            } else {
-                System.err.println("Error updating doctor: " + e.getMessage());
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error checking for conflicts: " + e.getMessage());
+            return false;
+        }
+        
+        if (phoneConflict || emailConflict) {
+            System.err.println("Error: Cannot update. Another doctor already has this phone or email.");
+            return false;
+        }
+        
+        // Read all lines and update the matching doctor
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_DOCTORS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                if (parts.length >= 7) {
+                    long currentDoctorId = Long.parseLong(parts[1].trim());
+                    if (currentDoctorId == doctor.getId()) {
+                        // Update this doctor's information
+                        // Format: id|doctor_id|name|faculty|phone|email|room
+                        String updatedLine = String.join(DELIMITER,
+                            parts[0].trim(),                    // id (unchanged)
+                            parts[1].trim(),                    // doctor_id (unchanged)
+                            doctor.getName(),                   // name (updated)
+                            doctor.getFaculty(),                // faculty (updated)
+                            doctor.getPhone(),                  // phone (updated)
+                            doctor.getEmail(),                  // email (updated)
+                            doctor.getRoom()                    // room (updated)
+                        );
+                        lines.add(updatedLine);
+                        doctorFound = true;
+                    } else {
+                        lines.add(line); // Keep original line
+                    }
+                } else {
+                    lines.add(line); // Keep malformed lines as-is
+                }
             }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error reading doctors file for update: " + e.getMessage());
+            return false;
+        }
+        
+        if (!doctorFound) {
+            System.out.println("No doctor found with ID: " + doctor.getId() + " to update.");
+            return false;
+        }
+        
+        // Write all lines back to the file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_DOCTORS))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
+            System.out.println("Doctor ID " + doctor.getId() + " updated successfully.");
+            return true;
+        } catch (IOException e) {
+            System.err.println("Error writing updated doctors file: " + e.getMessage());
             return false;
         }
     }
+    /**
+     * Deletes a doctor using file-based I/O.
+     * Checks for foreign key constraints (appointments associated with the doctor).
+     * @param doctorId The ID of the doctor to delete.
+     * @return True if deletion was successful, false otherwise.
+     */
     public boolean deleteDoctor(long doctorId) {
-        String sql = "DELETE FROM doctors WHERE doctor_id = ?";
-        try (Connection conn = connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, doctorId);
-            int rowsAffected = pstmt.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Doctor ID " + doctorId + " deleted successfully.");
-                return true;
-            } else {
-                System.out.println("No doctor found with ID: " + doctorId + " to delete.");
-                return false;
+        // First, check if there are any appointments associated with this doctor
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_APPOINTMENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                if (parts.length >= 8) {
+                    long currentDoctorId = Long.parseLong(parts[1].trim()); // doctor_id is at index 1
+                    if (currentDoctorId == doctorId) {
+                        System.err.println("Error: Cannot delete doctor ID " + doctorId + " because there are appointments associated with this doctor. Please reassign or delete their appointments first.");
+                        return false;
+                    }
+                }
             }
-        } catch (SQLException e) {
-            if (e.getMessage().contains("FOREIGN KEY constraint failed")) {
-                System.err.println("Error: Cannot delete doctor ID " + doctorId + " because there are appointments associated with this doctor. Please reassign or delete their appointments first.");
-            } else {
-                System.err.println("Error deleting doctor: " + e.getMessage());
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error checking for associated appointments: " + e.getMessage());
+            return false;
+        }
+        
+        // Now delete the doctor from the doctors file
+        boolean doctorFound = false;
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_DOCTORS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                if (parts.length >= 7) {
+                    long currentDoctorId = Long.parseLong(parts[1].trim());
+                    if (currentDoctorId == doctorId) {
+                        doctorFound = true;
+                        // Skip this line (delete the doctor)
+                        continue;
+                    }
+                }
+                lines.add(line); // Keep all other lines
             }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error reading doctors file for deletion: " + e.getMessage());
+            return false;
+        }
+        
+        if (!doctorFound) {
+            System.out.println("No doctor found with ID: " + doctorId + " to delete.");
+            return false;
+        }
+        
+        // Write updated doctors file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_DOCTORS))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
+            System.out.println("Doctor ID " + doctorId + " deleted successfully.");
+            return true;
+        } catch (IOException e) {
+            System.err.println("Error writing updated doctors file: " + e.getMessage());
             return false;
         }
     }
     public int addPatient(Patient patient) {
-        String sql = "INSERT INTO patients(patient_id, name, phone, dob) VALUES(?,?,?,?)";
-        int Id = -1;
-        try (Connection conn = connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setLong(1, patient.getId());
-            pstmt.setString(2, patient.getName());
-            pstmt.setString(3, patient.getPhone());
-            pstmt.setString(4, patient.getDOB());
-            pstmt.executeUpdate();
+        int newId = patientIdCounter.incrementAndGet(); // Get next ID
+        // Format patient data into a single line, delimited by '|'
+        String patientLine = String.join(DELIMITER,
+            String.valueOf(newId),
+            patient.getUsername(),
+            patient.getPassword(), // This should be the HASHED password (from your previous security discussion)
+            String.valueOf(patient.getId()),
+            patient.getName(),
+            patient.getPhone(),
+            patient.getDOB()
+        );
 
-            ResultSet rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                Id = rs.getInt(1);
-                System.out.println("Patient added with database ID: " + Id);
-            }
-        } catch (SQLException e) {
-            if (e.getMessage().contains("UNIQUE constraint failed: patients.phone")) {
-                System.err.println("Error: A patient with this phone number already exists.");
-            } else {
-                System.err.println("Error adding patient: " + e.getMessage());
-            }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_PATIENTS, true))) {
+            writer.write(patientLine);
+            writer.newLine();
+            saveIdCounters(); // Persist ID counter
+            System.out.println("Patient added to file: " + patient.getUsername() + " with ID: " + newId);
+            return newId;
+        } catch (IOException e) {
+            System.err.println("Error adding patient to file: " + e.getMessage());
+            patientIdCounter.decrementAndGet(); // Rollback ID if write fails
+            return -1;
         }
-        return Id;
     }
 
     /**
@@ -436,46 +571,138 @@ public class DatabaseManager {
      * @param appointment The Appointment object to add.
      * @return The generated ID of the new appointment, or -1 if insertion failed.
      */
-    public int addAppointment(Appointment appointments) { // MODIFIED SIGNATURE
-        String sql = "INSERT INTO appointments(patient_id, doctor_id, field, appointment_time, doctor_name, patient_name, room) VALUES(?,?,?,?,?,?)"; // MODIFIED SQL
-        int appointmentId = -1;
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setLong(1, appointments.getPatientId());
-            pstmt.setLong(2, appointments.getDoctorId()); 
-            pstmt.setString(3, appointments.getField());
-            pstmt.setString(4, appointments.getAppointmentTime().format(DATE_TIME_FORMATTER));
-            pstmt.setString(5, appointments.getDoctorName());
-            pstmt.setString(6, appointments.getPatientName());
-            pstmt.setString(7, appointments.getRoom());
-            pstmt.executeUpdate();
+    public int addAppointment(Appointment appointment) { // MODIFIED SIGNATURE
+        int newId = appointmentIdCounter.incrementAndGet(); // Get next ID
+        // Format appointment data into a single line, delimited by '|'
+        // Format: id|doctor_id|patient_id|field|doctor_name|patient_name|appointment_time|room
+        String appointmentLine = String.join(DELIMITER,
+            String.valueOf(newId),                                              // id
+            String.valueOf(appointment.getDoctorId()),                          // doctor_id
+            String.valueOf(appointment.getPatientId()),                         // patient_id
+            appointment.getField(),                                             // field
+            appointment.getDoctorName(),                                        // doctor_name
+            appointment.getPatientName(),                                       // patient_name
+            appointment.getAppointmentTime().format(DATE_TIME_FORMATTER),      // appointment_time
+            appointment.getRoom()                                               // room
+        );
 
-            ResultSet rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                appointmentId = rs.getInt(1);
-                System.out.println("Appointment added with ID: " + appointmentId);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error adding appointment: " + e.getMessage());
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_APPOINTMENTS, true))) {
+            writer.write(appointmentLine);
+            writer.newLine();
+            saveIdCounters(); // Persist ID counter
+            System.out.println("appointment added to file: with ID: " + newId);
+            return newId;
+        } catch (IOException e) {
+            System.err.println("Error adding appointment to file: " + e.getMessage());
+            appointmentIdCounter.decrementAndGet(); // Rollback ID if write fails
+            return -1;
         }
-        return appointmentId;
     }
+    /**
+     * Deletes an appointment using file-based I/O.
+     * @param appointmentId The ID of the appointment to delete.
+     * @return True if deletion was successful, false otherwise.
+     */
     public boolean deleteAppointment(int appointmentId) {
-        String sql = "DELETE FROM appointments WHERE id = ?";
-        try (Connection conn = connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, appointmentId);
-            int rowsAffected = pstmt.executeUpdate();
-            
-            if (rowsAffected > 0) {
-                System.out.println("Appointment with ID " + appointmentId + " deleted successfully");
-                return true;
-            } else {
-                System.out.println("No appointment found with ID: " + appointmentId);
-                return false;
+        boolean appointmentFound = false;
+        List<String> lines = new ArrayList<>();
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_APPOINTMENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                if (parts.length >= 8) {
+                    int currentAppointmentId = Integer.parseInt(parts[0].trim());
+                    if (currentAppointmentId == appointmentId) {
+                        appointmentFound = true;
+                        // Skip this line (delete the appointment)
+                        continue;
+                    }
+                }
+                lines.add(line); // Keep all other lines
             }
-        } catch (SQLException e) {
-            System.err.println("Error deleting appointment: " + e.getMessage());
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error reading appointments file for deletion: " + e.getMessage());
+            return false;
+        }
+        
+        if (!appointmentFound) {
+            System.out.println("No appointment found with ID: " + appointmentId);
+            return false;
+        }
+        
+        // Write updated appointments file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_APPOINTMENTS))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
+            System.out.println("Appointment with ID " + appointmentId + " deleted successfully");
+            return true;
+        } catch (IOException e) {
+            System.err.println("Error writing updated appointments file: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Updates an existing appointment's information using file-based I/O.
+     * @param appointment The Appointment object with updated information (id must match an existing appointment).
+     * @return True if update was successful, false otherwise.
+     */
+    public boolean updateAppointment(Appointment appointment) {
+        List<String> lines = new ArrayList<>();
+        boolean appointmentFound = false;
+        
+        // Read all lines and update the matching appointment
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_APPOINTMENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                if (parts.length >= 8) {
+                    int currentAppointmentId = Integer.parseInt(parts[0].trim());
+                    if (currentAppointmentId == appointment.getId()) {
+                        // Update this appointment's information
+                        // Format: id|doctor_id|patient_id|field|doctor_name|patient_name|appointment_time|room
+                        String updatedLine = String.join(DELIMITER,
+                            parts[0].trim(),                                                    // id (unchanged)
+                            String.valueOf(appointment.getDoctorId()),                          // doctor_id (updated)
+                            String.valueOf(appointment.getPatientId()),                         // patient_id (updated)
+                            appointment.getField(),                                             // field (updated)
+                            appointment.getDoctorName(),                                        // doctor_name (updated)
+                            appointment.getPatientName(),                                       // patient_name (updated)
+                            appointment.getAppointmentTime().format(DATE_TIME_FORMATTER),      // appointment_time (updated)
+                            appointment.getRoom()                                               // room (updated)
+                        );
+                        lines.add(updatedLine);
+                        appointmentFound = true;
+                    } else {
+                        lines.add(line); // Keep original line
+                    }
+                } else {
+                    lines.add(line); // Keep malformed lines as-is
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error reading appointments file for update: " + e.getMessage());
+            return false;
+        }
+        
+        if (!appointmentFound) {
+            System.out.println("No appointment found with ID: " + appointment.getId() + " to update.");
+            return false;
+        }
+        
+        // Write all lines back to the file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_APPOINTMENTS))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
+            System.out.println("Appointment ID " + appointment.getId() + " updated successfully.");
+            return true;
+        } catch (IOException e) {
+            System.err.println("Error writing updated appointments file: " + e.getMessage());
             return false;
         }
     }
@@ -486,50 +713,63 @@ public class DatabaseManager {
      */
     public List<Patient> getAllPatients() {
         List<Patient> patients = new ArrayList<>();
-        String sql = "SELECT username, patient_id, name, phone, dob FROM patients";
-        try (Connection conn = connect();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                patients.add(new Patient(
-                    rs.getString("username"),
-                    rs.getLong("patient_id"),
-                    rs.getString("name"),
-                    rs.getString("phone"),
-                    rs.getString("dob")
-                ));
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_PATIENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                // Ensure enough parts for a complete patient record
+                if (parts.length >= 7) {
+                    try {
+                        // Reconstruct Patient object (id, username, password, patient_id, name, phone, dob)
+                        patients.add(new Patient(
+                            Integer.parseInt(parts[0].trim()),    // id
+                            parts[1].trim(),                      // username
+                            parts[2].trim(),                      // password (hashed)
+                            Long.parseLong(parts[3].trim()),      // patient_id
+                            parts[4].trim(),                      // name
+                            parts[5].trim(),                      // phone
+                            parts[6].trim()                       // dob
+                        ));
+                    }
+                    catch (NumberFormatException e) {
+                        System.err.println("Error parsing patient data in file: " + line + " - " + e.getMessage());
+                    }
+                }
             }
-        } catch (SQLException e) {
-            System.err.println("Error retrieving patients: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error reading patients file: " + e.getMessage());
         }
         return patients;
     }
+
 //get patient by username
     public Patient getPatientByUsername(String username) {
-        String sql = "SELECT id, username, password, patient_id, name, phone, dob FROM Patients WHERE username = ?";
-        
-        try (Connection conn = connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                return new Patient(
-                    rs.getInt("id"),
-                    rs.getString("username"),
-                    rs.getString("password"),
-                    rs.getLong("patient_id"),
-                    rs.getString("name"),
-                    rs.getString("phone"),
-                    rs.getString("dob")
-                );
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_PATIENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                // Ensure enough parts and username matches
+                if (parts.length >= 7 && parts[1].trim().equalsIgnoreCase(username)) {
+                    try {
+                        // Reconstruct Patient object (id, username, password, patient_id, name, phone, dob)
+                        return new Patient(
+                            Integer.parseInt(parts[0].trim()),    // id
+                            parts[1].trim(),                      // username
+                            parts[2].trim(),                      // password (hashed)
+                            Long.parseLong(parts[3].trim()),      // patient_id
+                            parts[4].trim(),                      // name
+                            parts[5].trim(),                      // phone
+                            parts[6].trim()                       // dob
+                        );
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error parsing patient data in file: " + line + " - " + e.getMessage());
+                    }
+                }
             }
-
-        } catch (SQLException e) {
-            System.err.println("Error retrieving patient by username '" + username + "': " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error reading patients file: " + e.getMessage());
         }
-        return null;
+        return null; // Patient not found
     }
     /**
      * Retrieves all appointments from the database, including patient name.
@@ -537,47 +777,34 @@ public class DatabaseManager {
      */
     public List<Appointment> getAllAppointments() {
         List<Appointment> appointments = new ArrayList<>();
-        String sql = """
-            SELECT
-                a.id,
-                a.patient_id,
-                p.name AS patient_name,
-                a.doctor_id,        -- ADDED
-                d.name AS doctor_name, -- ADDED
-                a.field,
-                a.appointment_time,
-                a.doctor_name,
-                a.patient_name, -- ADDED
-                a.room
-            FROM
-                appointments a
-            JOIN
-                patients p ON a.patient_id = p.patient_id
-            JOIN
-                doctors d ON a.doctor_id = d.doctor_id -- JOIN WITH DOCTORS TABLE
-            ORDER BY
-                a.appointment_time
-            """;
-        try (Connection conn = connect();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                LocalDateTime time = LocalDateTime.parse(rs.getString("appointment_time"), DATE_TIME_FORMATTER);
-                appointments.add(new Appointment(
-                    rs.getInt("id"),
-                    rs.getLong("patient_id"),
-                    rs.getString("field"),
-                    time,
-                    rs.getString("doctor_name"), // Display current doctor's name from DB
-                    rs.getString("patient_name"),
-                    rs.getString("room")
-                    
-                    // Note: If your Appointment model had a doctorId field, you'd retrieve it here:
-                    //rs.getInt("doctor_id")
-                ));
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_APPOINTMENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                // Ensure enough parts for a complete appointment record (8 fields expected based on `addAppointment`)
+                if (parts.length >= 8) {
+                    try {
+                        appointments.add(new Appointment(
+                            Integer.parseInt(parts[0].trim()),                            // id
+                            Long.parseLong(parts[1].trim()),                             // doctor_id
+                            Long.parseLong(parts[2].trim()),                             // patient_id
+                            parts[3].trim(),                                             // field
+                            LocalDateTime.parse(parts[6].trim(), DATE_TIME_FORMATTER),  // appointment_time
+                            parts[4].trim(),                                             // doctor_name
+                            parts[5].trim(),                                             // patient_name
+                            parts[7].trim()                                              // room
+                        ));
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error parsing appointment ID or related data: " + line + " - " + e.getMessage());
+                    } catch (Exception e) { // Catch other parsing errors like DateTimeParseException
+                        System.err.println("Error parsing appointment data (date/time/other): " + line + " - " + e.getMessage());
+                    }
+                } else {
+                     System.err.println("Skipping malformed appointment line (not enough parts): " + line);
+                }
             }
-        } catch (SQLException e) {
-            System.err.println("Error retrieving appointments: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error reading appointments file: " + e.getMessage());
         }
         return appointments;
     }
@@ -588,47 +815,37 @@ public class DatabaseManager {
      */
     public List<Appointment> getAppointmentsByPatient(long patientId) {
         List<Appointment> appointments = new ArrayList<>();
-        String sql = """
-            SELECT
-                a.id,
-                a.patient_id,
-                p.name AS patient_name,
-                a.doctor_id,
-                d.name AS doctor_name,
-                a.field,
-                a.appointment_time,
-                a.doctor_name,
-                a.patient_name,
-                a.room
-            FROM
-                appointments a
-            JOIN
-                patients p ON a.patient_id = p.patient_id
-            JOIN
-                doctors d ON a.doctor_id = d.doctor_id
-            WHERE
-                a.patient_id = ?
-            ORDER BY
-                a.appointment_time
-            """;
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, patientId);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                LocalDateTime time = LocalDateTime.parse(rs.getString("appointment_time"), DATE_TIME_FORMATTER);
-                appointments.add(new Appointment(
-                    rs.getInt("id"),
-                    rs.getLong("patient_id"),
-                    rs.getString("field"),
-                    time,
-                    rs.getString("doctor_name"), // Display current doctor's name from DB
-                    rs.getString("patient_name"),
-                    rs.getString("room")
-                ));
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_APPOINTMENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                // Ensure enough parts for a complete appointment record (8 fields expected based on `addAppointment`)
+                if (parts.length >= 8) {
+                    try {
+                        long currentAppointmentPatientId = Long.parseLong(parts[2].trim());
+                        if(currentAppointmentPatientId == patientId) {
+                            appointments.add(new Appointment(
+                            Integer.parseInt(parts[0].trim()),                            // id
+                            Long.parseLong(parts[1].trim()),                             // doctor_id
+                            Long.parseLong(parts[2].trim()),                             // patient_id
+                            parts[3].trim(),                                             // field
+                            LocalDateTime.parse(parts[6].trim(), DATE_TIME_FORMATTER),  // appointment_time
+                            parts[4].trim(),                                             // doctor_name
+                            parts[5].trim(),                                             // patient_name
+                            parts[7].trim()                                              // room
+                        ));
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error parsing appointment ID or related data: " + line + " - " + e.getMessage());
+                    } catch (Exception e) {
+                        System.err.println("Error parsing appointment data (date/time/other): " + line + " - " + e.getMessage());
+                    }
+                } else {
+                     System.err.println("Skipping malformed appointment line (not enough parts): " + line);
+                }
             }
-        } catch (SQLException e) {
-            System.err.println("Error retrieving appointments for patient ID " + patientId + ": " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error reading appointments file: " + e.getMessage());
         }
         return appointments;
     }
@@ -639,113 +856,209 @@ public class DatabaseManager {
      * @return A list of Appointment objects for the given doctor.
      */
     public List<Appointment> getAppointmentsByDoctor(long doctorId) { // NEW METHOD
-        List<Appointment> appointments = new ArrayList<>();
-        String sql = """
-            SELECT
-                a.id,
-                a.patient_id,
-                p.name AS patient_name,
-                a.doctor_id,
-                d.name AS doctor_name,
-                a.field,
-                a.appointment_time,
-                a.doctor_name_at_booking,
-                a.room
-            FROM
-                appointments a
-            JOIN
-                patients p ON a.patient_id = p.id
-            JOIN
-                doctors d ON a.doctor_id = d.id
-            WHERE
-                a.doctor_id = ?
-            ORDER BY
-                a.appointment_time
-            """;
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, doctorId);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                LocalDateTime time = LocalDateTime.parse(rs.getString("appointment_time"), DATE_TIME_FORMATTER);
-                appointments.add(new Appointment(
-                    rs.getInt("id"),
-                    rs.getLong("patient_id"),
-                    rs.getString("field"),
-                    time,
-                    rs.getString("doctor_name"),
-                    rs.getString("room"),
-                    rs.getString("patient_name")
-                ));
+       List<Appointment> appointments = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_APPOINTMENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                // Ensure enough parts for a complete appointment record (8 fields expected based on `addAppointment`)
+                if (parts.length >= 8) {
+                    try {
+                        long currentAppointmentDoctorId = Long.parseLong(parts[1].trim());
+                        if(currentAppointmentDoctorId == doctorId) {
+                            appointments.add(new Appointment(
+                            Integer.parseInt(parts[0].trim()),                            // id
+                            Long.parseLong(parts[1].trim()),                             // doctorId
+                            Long.parseLong(parts[2].trim()),                             // patientId
+                            parts[3].trim(),                                             // field
+                            LocalDateTime.parse(parts[6].trim(), DATE_TIME_FORMATTER),  // appointmentTime
+                            parts[4].trim(),                                             // doctorName (stored directly)
+                            parts[5].trim(),                                             // patientName (stored directly)
+                            parts[7].trim()                                              // room
+                        ));
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error parsing appointment ID or related data: " + line + " - " + e.getMessage());
+                    } catch (Exception e) {
+                        System.err.println("Error parsing appointment data (date/time/other): " + line + " - " + e.getMessage());
+                    }
+                } else {
+                     System.err.println("Skipping malformed appointment line (not enough parts): " + line);
+                }
             }
-        } catch (SQLException e) {
-            System.err.println("Error retrieving appointments for doctor ID " + doctorId + ": " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error reading appointments file: " + e.getMessage());
         }
         return appointments;
     }
     /**
-     * Updates an existing patient's information.
-     * @param patient The Patient object with updated information (ID must match an existing patient).
+     * Updates an existing patient's information using file-based I/O.
+     * @param patient The Patient object with updated information (patient_id must match an existing patient).
      * @return True if update was successful, false otherwise.
      */
     public boolean updatePatient(Patient patient) {
-        String sql = "UPDATE patients SET name = ?, phone = ?, dob = ? WHERE patient_id = ?";
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, patient.getName());
-            pstmt.setString(2, patient.getPhone());
-            pstmt.setString(3, patient.getDOB());
-            pstmt.setLong(4, patient.getId());
-            int rowsAffected = pstmt.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Patient ID " + patient.getId() + " updated successfully.");
-                return true;
-            } else {
-                System.out.println("No patient found with ID: " + patient.getId() + " to update.");
-                return false;
+        List<String> lines = new ArrayList<>();
+        boolean patientFound = false;
+        boolean phoneConflict = false;
+        
+        // First, check for phone number conflicts (excluding the patient being updated)
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_PATIENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                if (parts.length >= 7) {
+                    long currentPatientId = Long.parseLong(parts[3].trim());
+                    String currentPhone = parts[5].trim();
+                    // Check if another patient has the same phone number
+                    if (currentPatientId != patient.getId() && currentPhone.equals(patient.getPhone())) {
+                        phoneConflict = true;
+                        break;
+                    }
+                }
             }
-        } catch (SQLException e) {
-            if (e.getMessage().contains("UNIQUE constraint failed: patients.phone")) {
-                System.err.println("Error: Cannot update. Another patient already has this phone number.");
-            } else {
-                System.err.println("Error updating patient: " + e.getMessage());
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error checking for phone conflicts: " + e.getMessage());
+            return false;
+        }
+        
+        if (phoneConflict) {
+            System.err.println("Error: Cannot update. Another patient already has this phone number.");
+            return false;
+        }
+        
+        // Read all lines and update the matching patient
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_PATIENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                if (parts.length >= 7) {
+                    long currentPatientId = Long.parseLong(parts[3].trim());
+                    if (currentPatientId == patient.getId()) {
+                        // Update this patient's information
+                        // Format: id|username|password|patient_id|name|phone|dob
+                        String updatedLine = String.join(DELIMITER,
+                            parts[0].trim(),                    // id (unchanged)
+                            parts[1].trim(),                    // username (unchanged)
+                            parts[2].trim(),                    // password (unchanged)
+                            parts[3].trim(),                    // patient_id (unchanged)
+                            patient.getName(),                  // name (updated)
+                            patient.getPhone(),                 // phone (updated)
+                            patient.getDOB()                    // dob (updated)
+                        );
+                        lines.add(updatedLine);
+                        patientFound = true;
+                    } else {
+                        lines.add(line); // Keep original line
+                    }
+                } else {
+                    lines.add(line); // Keep malformed lines as-is
+                }
             }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error reading patients file for update: " + e.getMessage());
+            return false;
+        }
+        
+        if (!patientFound) {
+            System.out.println("No patient found with ID: " + patient.getId() + " to update.");
+            return false;
+        }
+        
+        // Write all lines back to the file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_PATIENTS))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
+            System.out.println("Patient ID " + patient.getId() + " updated successfully.");
+            return true;
+        } catch (IOException e) {
+            System.err.println("Error writing updated patients file: " + e.getMessage());
             return false;
         }
     }
 
     /**
-     * Deletes a patient and all their associated appointments.
+     * Deletes a patient and all their associated appointments using file-based I/O.
      * @param patientId The ID of the patient to delete.
      * @return True if deletion was successful, false otherwise.
      */
     public boolean deletePatient(long patientId) {
-        String sql = "DELETE FROM patients WHERE patient_id = ?";
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, patientId);
-            int rowsAffected = pstmt.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Patient ID " + patientId + " and associated appointments deleted successfully.");
-                return true;
-            } else {
-                System.out.println("No patient found with ID: " + patientId + " to delete.");
-                return false;
+        boolean patientFound = false;
+        
+        // First, delete the patient from the patients file
+        List<String> patientLines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_PATIENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                if (parts.length >= 7) {
+                    long currentPatientId = Long.parseLong(parts[3].trim());
+                    if (currentPatientId == patientId) {
+                        patientFound = true;
+                        // Skip this line (delete the patient)
+                        continue;
+                    }
+                }
+                patientLines.add(line); // Keep all other lines
             }
-        } catch (SQLException e) {
-            System.err.println("Error deleting patient: " + e.getMessage());
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error reading patients file for deletion: " + e.getMessage());
             return false;
         }
+        
+        if (!patientFound) {
+            System.out.println("No patient found with ID: " + patientId + " to delete.");
+            return false;
+        }
+        
+        // Write updated patients file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_PATIENTS))) {
+            for (String line : patientLines) {
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing updated patients file: " + e.getMessage());
+            return false;
+        }
+        
+        // Now delete all associated appointments (cascade delete)
+        List<String> appointmentLines = new ArrayList<>();
+        int deletedAppointments = 0;
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_APPOINTMENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                if (parts.length >= 8) {
+                    long currentPatientId = Long.parseLong(parts[2].trim()); // patient_id is at index 2
+                    if (currentPatientId == patientId) {
+                        deletedAppointments++;
+                        // Skip this line (delete the appointment)
+                        continue;
+                    }
+                }
+                appointmentLines.add(line); // Keep all other lines
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error reading appointments file for cascade deletion: " + e.getMessage());
+            // Patient was already deleted, so we continue but log the error
+        }
+        
+        // Write updated appointments file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_APPOINTMENTS))) {
+            for (String line : appointmentLines) {
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing updated appointments file: " + e.getMessage());
+            // Patient was already deleted, so we continue but log the error
+        }
+        
+        System.out.println("Patient ID " + patientId + " and " + deletedAppointments + " associated appointments deleted successfully.");
+        return true;
     }
 
-    @SuppressWarnings("exports")
-	public static Connection getConnection() {
-        try {
-            return DriverManager.getConnection(DATABASE_URL);
-        } catch (SQLException e) {
-            System.err.println("Error getting connection: " + e.getMessage());
-            return null;
-        }
-    }
 
 }
