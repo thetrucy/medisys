@@ -11,12 +11,17 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 
 public class UpcomingApmController implements Initializable {
+	@FXML
+    private TextField FilterField;
+	
     @FXML
     private TableView<UpcomingAppointment> appointmentTable;
 
@@ -37,20 +42,32 @@ public class UpcomingApmController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Gán column -> field trong class Appointment
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
         roomColumn.setCellValueFactory(new PropertyValueFactory<>("room"));
         departmentColumn.setCellValueFactory(new PropertyValueFactory<>("department"));
         doctorColumn.setCellValueFactory(new PropertyValueFactory<>("doctor"));
         notesColumn.setCellValueFactory(new PropertyValueFactory<>("notes"));
 
-        // Dữ liệu mẫu
         ObservableList<UpcomingAppointment> sampleAppointments = FXCollections.observableArrayList(
             new UpcomingAppointment("2025-07-01", "1", "Tai Mũi Họng", "BS. Trần Văn A", "Khám định kỳ"),
             new UpcomingAppointment("2025-07-10", "2", "Da Liễu", "BS. Nguyễn Thị B", "Theo dõi mụn trứng cá")
         );
 
-        appointmentTable.setItems(sampleAppointments);
+        FilteredList<UpcomingAppointment> filteredData = new FilteredList<>(sampleAppointments, p -> true);
+
+        FilterField.textProperty().addListener((observable, oldValue, newValue) -> {
+            String filter = newValue.toLowerCase();
+            filteredData.setPredicate(apm -> {
+                if (filter == null || filter.isEmpty()) {
+                    return true;
+                }
+
+                return apm.getDoctor().toLowerCase().contains(filter) ||
+                       apm.getDepartment().toLowerCase().contains(filter);
+            });
+        });
+
+        appointmentTable.setItems(filteredData);
 
         appointmentTable.setOnMouseClicked(event -> {
             UpcomingAppointment selected = appointmentTable.getSelectionModel().getSelectedItem();
@@ -63,31 +80,31 @@ public class UpcomingApmController implements Initializable {
             }
         });
     }
-        @FXML
-    private void onHomeButtonClick(ActionEvent event) {
-        try {
-            Main.setRoot("AppointmentOne_1");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    //     @FXML
+    // private void onHomeButtonClick(ActionEvent event) {
+    //     try {
+    //         Main.setRoot("AppointmentOne_1");
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 
-    @FXML
-    private void onAppointmentsButtonClick(ActionEvent event) {
-        try {
-            Main.setRoot("UpcomingAppointments"); 
-       } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    // @FXML
+    // private void onAppointmentsButtonClick(ActionEvent event) {
+    //     try {
+    //         Main.setRoot("UpcomingAppointments"); 
+    //    } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 
-    @FXML
-    private void onProfileButtonClick(ActionEvent event) {
-        try {
-            Main.setRoot("PatientProfile");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    // @FXML
+    // private void onProfileButtonClick(ActionEvent event) {
+    //     try {
+    //         Main.setRoot("PatientProfile");
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 
 }

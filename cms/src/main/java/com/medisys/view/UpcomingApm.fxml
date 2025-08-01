@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -15,15 +16,8 @@
             <Font name="System Bold" size="24.0" />
          </font>
       </Text>
-      <HBox prefHeight="38.0" prefWidth="780.0">
-         <children>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="&lt;Thanh tìm kiếm&gt;">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Text>
-         </children>
-      </HBox>
+      <TextField fx:id="FilterField" prefHeight="26.0" prefWidth="760.0" promptText="Tìm Kiếm" style="-fx-background-color: #ffffff; -fx-background-radius: 5px;" />
+      <HBox prefHeight="38.0" prefWidth="780.0" />
       <TableView fx:id="appointmentTable" prefHeight="395.0" prefWidth="818.0">
          <columns>
             <TableColumn fx:id="dateColumn" prefWidth="78.5" text="Ngày" />

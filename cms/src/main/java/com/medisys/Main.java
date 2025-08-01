@@ -11,39 +11,16 @@ import java.io.IOException;
 import java.net.URL; // Import URL class
 
 public class Main extends Application {
-
-    private static Scene scene;
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/Main.fxml"));
+        Scene scene = new Scene(loader.load());
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Clinic App");
+        primaryStage.show();
+    }
 
     public static void main(String[] args) {
-        launch();
-    }
-
-    @Override
-    public void start(Stage stage) throws IOException {
-        DatabaseManager.getInstance();
-
-        String initialFxmlPath = "view/AppointmentOne_1"; 
-        System.out.println("Main: Attempting to load initial FXML: " + initialFxmlPath);
-
-        Parent initialRoot = loadFXML(initialFxmlPath);
-        scene = new Scene(initialRoot);
-        stage.setScene(scene);
-        stage.setTitle("MediSys CMS");
-        stage.show();
-    }
-
-    public static void setRoot(String fxml) throws IOException {
-        System.out.println("Main: Attempting to set root to FXML: view/" + fxml);
-
-        scene.setRoot(loadFXML("view/" + fxml));
-    }
-
-    private static Parent loadFXML(String fxml) throws IOException {
- 
-        URL fxmlLocation = Main.class.getResource(fxml + ".fxml");
-
-
-        FXMLLoader fxmlLoader = new FXMLLoader(fxmlLocation);
-        return fxmlLoader.load();
+        launch(args);
     }
 }
