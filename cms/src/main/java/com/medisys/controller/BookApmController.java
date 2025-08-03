@@ -26,10 +26,16 @@ import javafx.util.Callback;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -536,21 +542,43 @@ public class BookApmController implements Initializable {
     private boolean validateSelfBookingForm() {
         StringBuilder errors = new StringBuilder();
 
-        if (nameFieldSelf.getText().trim().isEmpty()) {
+        String name = nameFieldSelf.getText().trim();
+        if (name.isEmpty()) {
             errors.append("- Vui lòng nhập họ và tên\n");
+        } else if (name.length() < 2) {
+            errors.append("- Họ và tên phải có ít nhất 2 ký tự\n");
+        } else if (name.length() > 50) {
+            errors.append("- Họ và tên không được vượt quá 50 ký tự\n");
+        } else if (!name.matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
+            errors.append("- Họ và tên chỉ được chứa chữ cái và khoảng trắng\n");
         }
-        if (dobFieldSelf.getText().trim().isEmpty()) {
+        
+        String dob = dobFieldSelf.getText().trim();
+        if (dob.isEmpty()) {
             errors.append("- Vui lòng nhập ngày sinh\n");
+        } else if (!isValidDateFormat(dob)) {
+            errors.append("- Ngày sinh không đúng định dạng (dd/MM/yyyy) hoặc chưa đến ngày này\n");
+        } else if (!isValidAge(dob)) {
+            errors.append("- Tuổi phải từ 1 đến 120\n");
         }
-        if (phoneFieldSelf.getText().trim().isEmpty()) {
+
+        String phone = phoneFieldSelf.getText().trim();
+        if (phone.isEmpty()) {
             errors.append("- Vui lòng nhập số điện thoại\n");
+        } else if (!isValidPhoneNumber(phone)) {
+            errors.append("- Số điện thoại không hợp lệ (10-11 chữ số, bắt đầu bằng 0)\n");
         }
+
         if (genderBoxSelf.getValue() == null) {
             errors.append("- Vui lòng chọn giới tính\n");
         }
+
         if (appointmentDateSelf.getValue() == null) {
             errors.append("- Vui lòng chọn ngày khám\n");
+        } else if (!isValidAppointmentDate(appointmentDateSelf.getValue())) {
+            errors.append("- Ngày khám phải từ hôm nay trở đi\n");
         }
+
         if (appointmentTimeSelf.getValue() == null) {
             errors.append("- Vui lòng chọn giờ khám\n");
         }
@@ -565,34 +593,70 @@ public class BookApmController implements Initializable {
     private boolean validateOtherBookingForm() {
         StringBuilder errors = new StringBuilder();
 
-        if (patientIdField.getText().trim().isEmpty()) {
+        String id = patientIdField.getText().trim();
+        if (id.isEmpty()) {
             errors.append("- Vui lòng nhập CMND/CCCD bệnh nhân\n");
+        } else if (!isValidPatientId(id)) {
+            errors.append("- CMND/CCCD không hợp lệ (9 hoặc 12 chữ số)\n");
         }
-        if (patientNameField.getText().trim().isEmpty()) {
+
+        String name = patientNameField.getText().trim();
+        if (name.isEmpty()) {
             errors.append("- Vui lòng nhập họ và tên bệnh nhân\n");
+        } else if (name.length() < 2) {
+            errors.append("- Họ và tên phải có ít nhất 2 ký tự\n");
+        } else if (name.length() > 50) {
+            errors.append("- Họ và tên không được vượt quá 50 ký tự\n");
+        } else if (!name.matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
+            errors.append("- Họ và tên chỉ được chứa chữ cái và khoảng trắng\n");
         }
-        if (patientDobField.getText().trim().isEmpty()) {
+
+        String dob = patientDobField.getText().trim();
+        if (dob.isEmpty()) {
             errors.append("- Vui lòng nhập ngày sinh bệnh nhân\n");
+        } else if (!isValidDateFormat(dob)) {
+            errors.append("- Ngày sinh bệnh nhân không đúng định dạng (dd/MM/yyyy) hoặc chưa đến ngày này\n");
         }
-        if (patientPhoneField.getText().trim().isEmpty()) {
+
+        String patientPhone = patientPhoneField.getText().trim();
+        if (patientPhone.isEmpty()) {
             errors.append("- Vui lòng nhập số điện thoại bệnh nhân\n");
+        } else if (!isValidPhoneNumber(patientPhone)) {
+            errors.append("- Số điện thoại bệnh nhân không hợp lệ (10-11 chữ số, bắt đầu bằng 0)\n");
         } 
             
         if (patientGenderBox.getValue() == null) {
             errors.append("- Vui lòng chọn giới tính\n");
         }
+
         if (relationshipBox.getValue() == null) {
             errors.append("- Vui lòng chọn mối quan hệ với bệnh nhân\n");
         }
-        if (guardPhoneField.getText().trim().isEmpty()) {
+
+        String phoneG = guardPhoneField.getText().trim();
+        if (phoneG.isEmpty()) {
             errors.append("- Vui lòng nhập số điện thoại người giám hộ\n");
+        } else if (!isValidPhoneNumber(phoneG)) {
+            errors.append("- Số điện thoại người giám hộ không hợp lệ (10-11 chữ số, bắt đầu bằng 0)\n");
         }
-        if (guardNameField.getText().trim().isEmpty()) {
+
+        String nameG = guardNameField.getText().trim();
+        if (nameG.isEmpty()) {
             errors.append("- Vui lòng nhập tên người giám hộ\n");
+        } else if (nameG.length() < 2) {
+            errors.append("- Tên người giám hộ phải có ít nhất 2 ký tự\n");
+        } else if (nameG.length() > 50) {
+            errors.append("- Tên người giám hộ không được vượt quá 50 ký tự\n");
+        } else if (!nameG.matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
+            errors.append("- Tên người giám hộ chỉ được chứa chữ cái và khoảng trắng\n");
         }
+
         if (appointmentDateOther.getValue() == null) {
             errors.append("- Vui lòng chọn ngày khám\n");
+        } else if (!isValidAppointmentDate(appointmentDateOther.getValue())) {
+            errors.append("- Ngày khám phải từ hôm nay trở đi\n");
         }
+
         if (appointmentTimeOther.getValue() == null) {
             errors.append("- Vui lòng chọn giờ khám\n");
         }
@@ -603,6 +667,49 @@ public class BookApmController implements Initializable {
         }
         return true;
     }
+
+    //validations
+    private boolean isValidPatientId(String id) {
+        return id.matches("^\\d{9}$") || id.matches("^\\d{12}$");
+    }
+
+    private boolean isValidPhoneNumber(String phone) {
+        return phone.matches("^0\\d{9,10}$");
+    }
+
+    private boolean isValidDateFormat(String date) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            formatter = formatter.withResolverStyle(ResolverStyle.STRICT);
+            LocalDate.parse(date, formatter);
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
+
+    private boolean isValidAge(String dateStr) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate birthDate = LocalDate.parse(dateStr, formatter);
+            LocalDate currentDate = LocalDate.now();
+            
+            int age = Period.between(birthDate, currentDate).getYears();
+            
+            return age >= 1 && age <= 120 && !birthDate.isAfter(currentDate);
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
+
+    private boolean isValidAppointmentDate(Object dateValue) {
+        if (dateValue instanceof LocalDate) {
+            LocalDate appointmentDate = (LocalDate) dateValue;
+            return !appointmentDate.isBefore(LocalDate.now());
+        }
+        return false;
+    }
+
 
     private void clearSelfForm() {
         nameFieldSelf.clear();
