@@ -16,7 +16,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<VBox prefHeight="400.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.ProfileController">
+<VBox prefHeight="400.0" prefWidth="600.0" spacing="20.0" style="-fx-background-color: #7db4e8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.ProfileController">
    <padding>
       <Insets bottom="20" left="20" right="20" top="20" />
    </padding>
@@ -37,7 +37,7 @@
                <children>
                   <Label text="Họ và tên" GridPane.rowIndex="1">
                      <font>
-                        <Font name="System Bold" size="12.0" />
+                        <Font name="System Bold" size="14.0" />
                      </font>
                      <padding>
                         <Insets left="20.0" />
@@ -54,7 +54,7 @@
                   </HBox>
                   <Label text="ID">
                      <font>
-                        <Font name="System Bold" size="12.0" />
+                        <Font name="System Bold" size="14.0" />
                      </font>
                      <padding>
                         <Insets left="20.0" />
@@ -64,7 +64,7 @@
                   <TextField fx:id="IDField" disable="true" GridPane.columnIndex="1" />
                   <Label text="Giới tính" GridPane.rowIndex="2">
                      <font>
-                        <Font name="System Bold" size="12.0" />
+                        <Font name="System Bold" size="14.0" />
                      </font>
                      <padding>
                         <Insets left="20.0" />
@@ -72,7 +72,7 @@
                   </Label>
                   <Label text="Ngày sinh" GridPane.rowIndex="3">
                      <font>
-                        <Font name="System Bold" size="12.0" />
+                        <Font name="System Bold" size="14.0" />
                      </font>
                      <padding>
                         <Insets left="20.0" />
@@ -80,7 +80,7 @@
                   </Label>
                   <Label text="Điện thoại" GridPane.rowIndex="4">
                      <font>
-                        <Font name="System Bold" size="12.0" />
+                        <Font name="System Bold" size="14.0" />
                      </font>
                      <padding>
                         <Insets left="20.0" />
@@ -88,7 +88,7 @@
                   </Label>
                   <Label text="Email" GridPane.rowIndex="5">
                      <font>
-                        <Font name="System Bold" size="12.0" />
+                        <Font name="System Bold" size="14.0" />
                      </font>
                      <padding>
                         <Insets left="20.0" />
@@ -108,7 +108,7 @@
                <children>
                   <StackPane prefHeight="29.0" prefWidth="105.0">
                      <children>
-                        <Button fx:id="profileSaveButton" mnemonicParsing="false" onAction="#handleProfileSaveChanges" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Lưu thay đổi">
+                        <Button fx:id="profileSaveButton" mnemonicParsing="false" onAction="#handleProfileSaveChanges" style="-fx-background-color: #3c83c6; -fx-background-radius: 10px;" text="Lưu thay đổi">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
@@ -116,7 +116,7 @@
                               <Insets left="20.0" />
                            </StackPane.margin>
                         </Button>
-                        <Button fx:id="profileEditButton" mnemonicParsing="false" onAction="#handleProfileEditChanges" prefHeight="29.0" prefWidth="105.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Thay đổi">
+                        <Button fx:id="profileEditButton" mnemonicParsing="false" onAction="#handleProfileEditChanges" prefHeight="29.0" prefWidth="105.0" style="-fx-background-color: #3c83c6; -fx-background-radius: 10px;" text="Thay đổi">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>

@@ -3,6 +3,7 @@ package com.medisys.util;
 
 import com.medisys.model.Appointment;
 import com.medisys.model.Patient;
+import com.medisys.model.User;
 import com.medisys.model.Doctor;
 
 import java.io.BufferedReader;
@@ -21,6 +22,7 @@ public class DatabaseManager {
 
     private static DatabaseManager instance;
     private static final String DATA_DIR = "data";
+    private static final String DATA_USERS = DATA_DIR + "/user.txt";
     private static final String DATA_PATIENTS = DATA_DIR + "/patient.txt";
     private static final String DATA_DOCTORS = DATA_DIR + "/doctor.txt";
     private static final String DATA_APPOINTMENTS = DATA_DIR + "/appointment.txt";
@@ -30,6 +32,7 @@ public class DatabaseManager {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /*----------------------------ID--------------------- */
+    private static AtomicInteger userIdCounter = new AtomicInteger(0);
     private static AtomicInteger patientIdCounter = new AtomicInteger(0);//-> thread-safe
     private static AtomicInteger doctorIdCounter = new AtomicInteger(0);
     private static AtomicInteger appointmentIdCounter = new AtomicInteger(0);
@@ -54,6 +57,7 @@ public class DatabaseManager {
             dataDir.mkdirs(); // Create the 'data' directory
             System.out.println("Created data directory: " + DATA_DIR);
         }
+        createFileIfNotExists(DATA_USERS);
         createFileIfNotExists(DATA_PATIENTS);
         createFileIfNotExists(DATA_DOCTORS);
         createFileIfNotExists(DATA_APPOINTMENTS);
@@ -84,6 +88,7 @@ public class DatabaseManager {
                     String type = parts[0].trim();
                     int lastId = Integer.parseInt(parts[1].trim());
                     switch (type) {
+                        case "user": userIdCounter.set(lastId); break;
                         case "patient": patientIdCounter.set(lastId); break;
                         case "doctor": doctorIdCounter.set(lastId); break;
                         case "appointment": appointmentIdCounter.set(lastId); break;
@@ -96,6 +101,7 @@ public class DatabaseManager {
         }
 
         // Ensure counters are never lower than the max ID already in the data files
+        userIdCounter.set(Math.max(userIdCounter.get(), getMaxIdFromFile(DATA_USERS, 0)));
         patientIdCounter.set(Math.max(patientIdCounter.get(), getMaxIdFromFile(DATA_PATIENTS, 0)));
         doctorIdCounter.set(Math.max(doctorIdCounter.get(), getMaxIdFromFile(DATA_DOCTORS, 0)));
         appointmentIdCounter.set(Math.max(appointmentIdCounter.get(), getMaxIdFromFile(DATA_APPOINTMENTS, 0)));
@@ -130,6 +136,8 @@ public class DatabaseManager {
      */
         private void saveIdCounters() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_ID_COUNTER))) {
+            writer.write("user=" + userIdCounter.get());
+            writer.newLine();
             writer.write("patient=" + patientIdCounter.get());
             writer.newLine();
             writer.write("doctor=" + doctorIdCounter.get());
@@ -158,7 +166,7 @@ public class DatabaseManager {
         System.out.println("------Validate patients------");
         List<Patient> initialPatients = getAllPatients();
         for(Patient patient : initialPatients) {
-            System.out.println(patient.getUsername());
+            System.out.println(patient.getName());
         }
     }
 
@@ -175,8 +183,8 @@ public class DatabaseManager {
     private void populateInitialPatientsToFile() {
         // You can use a hardcoded list of patients here
         List<Patient> initialPatients = new ArrayList<>();
-        initialPatients.add(new Patient("apple","123123A@",79123123123L,"John Doe", "123-456-7890", "1990-01-01"));
-        initialPatients.add(new Patient("banana","123123T@",7912341234L,"Jane Smith", "234-567-8901", "1985-05-15"));
+        initialPatients.add(new Patient("079123123123","123123A@","John Doe", "123-456-7890", "1990-01-01"));
+        initialPatients.add(new Patient("07912341234", "123123T@","Jane Smith", "234-567-8901", "1985-05-15"));
         
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_PATIENTS, true))) {
             for (Patient patient : initialPatients) {
@@ -184,9 +192,8 @@ public class DatabaseManager {
                 // Format: id|username|password|patient_id|name|phone|dob
                 String patientLine = String.join(DELIMITER,
                     String.valueOf(newId),
-                    patient.getUsername(),
-                    patient.getPassword(),
                     String.valueOf(patient.getId()),
+                    patient.getPassword(),
                     patient.getName(),
                     patient.getPhone(),
                     patient.getDOB()
@@ -204,12 +211,12 @@ public class DatabaseManager {
     private void populateInitialDoctorsToFile() {
         List<Doctor> initialDoctors = new ArrayList<>();
         // Use your Doctor constructor: (doctor_id, name, faculty, phone, email, room)
-        initialDoctors.add(new Doctor(71111111,"Dr. John Smith", "General Practice", "0901234567", "john.smith@medisys.com", "Room 1"));
-        initialDoctors.add(new Doctor(71111222,"Dr. Jane Doe", "Pediatrics", "0907654321", "jane.doe@medisys.com", "Room 2"));
-        initialDoctors.add(new Doctor(71111333,"Dr. Robert Johnson", "Cardiology", "0912345678", "robert.j@medisys.com", "Room 3"));
-        initialDoctors.add(new Doctor(72222111,"Dr. Mary Lee", "Dermatology", "0918765432", "mary.l@medisys.com", "Room 4"));
-        initialDoctors.add(new Doctor(72222223,"Dr. David Kim", "Orthopedics", "0923456789", "david.k@medisys.com", "Room 5"));
-        initialDoctors.add(new Doctor(71113222,"Dr. Sarah Chen", "Internal Medicine", "0929876543", "sarah.c@medisys.com", "Room 6"));
+        initialDoctors.add(new Doctor("71111111","Dr. John Smith", "General Practice", "0901234567", "john.smith@medisys.com", "Room 1"));
+        initialDoctors.add(new Doctor("71111222","Dr. Jane Doe", "Pediatrics", "0907654321", "jane.doe@medisys.com", "Room 2"));
+        initialDoctors.add(new Doctor("71111333","Dr. Robert Johnson", "Cardiology", "0912345678", "robert.j@medisys.com", "Room 3"));
+        initialDoctors.add(new Doctor("72222111","Dr. Mary Lee", "Dermatology", "0918765432", "mary.l@medisys.com", "Room 4"));
+        initialDoctors.add(new Doctor("72222223","Dr. David Kim", "Orthopedics", "0923456789", "david.k@medisys.com", "Room 5"));
+        initialDoctors.add(new Doctor("71113222","Dr. Sarah Chen", "Internal Medicine", "0929876543", "sarah.c@medisys.com", "Room 6"));
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_DOCTORS, true))) {
             for (Doctor doctor : initialDoctors) {
@@ -237,7 +244,7 @@ public class DatabaseManager {
     private void populateInitialAppointmentsToFile() {
         // 1. Get a demo Patient and Doctor from the files
         Patient patient = getPatientByUsername("apple");
-        Doctor doctor = getDoctorById(71111111L);
+        Doctor doctor = getDoctorById("071111111");
 
         if (patient == null || doctor == null) {
             System.err.println("Cannot populate appointments: demo patient or doctor not found.");
@@ -294,7 +301,63 @@ public class DatabaseManager {
             System.err.println("Error populating initial appointments: " + e.getMessage());
         }
     }
+    public int addUser(User user) {
+        int newId = userIdCounter.incrementAndGet();
+        String userLine = String.join(DELIMITER,
+            String.valueOf(newId),
+            user.getId(),
+            user.getPassword(),
+            user.getName(),
+            user.getPhone(),
+            String.valueOf(user.isDoctor())
+        );
 
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_USERS, true))) {
+            writer.write(userLine);
+            writer.newLine();
+            saveIdCounters();
+            return newId;
+        } catch (IOException e) {
+            userIdCounter.decrementAndGet();
+            return -1;
+        }
+    }
+
+    public User getUserById(String nationalId) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_USERS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                if (parts.length >= 6 && parts[1].trim().equals(nationalId)) {
+                    boolean isDoctor = Boolean.parseBoolean(parts[5].trim());
+                    if (isDoctor) {
+                        // This part needs to be adapted if you store doctors in users.txt as well
+                        // For now, we assume only patients are in users.txt
+                        return null; 
+                    } else {
+                        return new Patient(
+                            parts[1].trim(),
+                            parts[2].trim(),
+                            parts[3].trim(),
+                            parts[4].trim(),
+                            isDoctor
+                        );
+                    }
+                }
+            }
+        } catch (IOException e) {
+            // silent fail
+        }
+        return null;
+    }
+
+    public User loginUser(String nationalId, String password) {
+        User user = getUserById(nationalId);
+        if (user != null && user.getPassword().equals(password)) {
+            return user;
+        }
+        return null;
+    }
     public int addDoctor(Doctor doctor) {
         int newId = doctorIdCounter.incrementAndGet(); // Get next ID
         // Format patient data into a single line, delimited by '|'
@@ -333,7 +396,7 @@ public class DatabaseManager {
                         // Reconstruct Doctor object (id, doctor_id, name, faculty, phone, email, room)
                         doctors.add(new Doctor(
                             Integer.parseInt(parts[0].trim()),    // id
-                            Long.parseLong(parts[1].trim()),      // doctor_id
+                            parts[1].trim(),      // doctor_id
                             parts[2].trim(),                      // name
                             parts[3].trim(),                      // faculty
                             parts[4].trim(),                      // phone
@@ -352,7 +415,7 @@ public class DatabaseManager {
         return doctors;
     }
       
-    public Doctor getDoctorById(long doctorId) {
+    public Doctor getDoctorById(String doctorId) {
         try (BufferedReader reader = new BufferedReader(new FileReader(DATA_DOCTORS))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -363,7 +426,7 @@ public class DatabaseManager {
                         // Reconstruct Doctor object (id, doctor_id, name, faculty, phone, email, room)
                         return new Doctor(
                             Integer.parseInt(parts[0].trim()),    // id
-                            Long.parseLong(parts[1].trim()),      // doctor_id
+                            parts[1].trim(),      // doctor_id
                             parts[2].trim(),                      // name
                             parts[3].trim(),                      // faculty
                             parts[4].trim(),                      // phone
@@ -399,7 +462,7 @@ public class DatabaseManager {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\" + DELIMITER);
                 if (parts.length >= 7) {
-                    long currentDoctorId = Long.parseLong(parts[1].trim());
+                    String currentDoctorId = parts[1].trim();
                     String currentPhone = parts[4].trim();
                     String currentEmail = parts[5].trim();
                     // Check if another doctor has the same phone or email
@@ -431,7 +494,7 @@ public class DatabaseManager {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\" + DELIMITER);
                 if (parts.length >= 7) {
-                    long currentDoctorId = Long.parseLong(parts[1].trim());
+                    String currentDoctorId = parts[1].trim();
                     if (currentDoctorId == doctor.getId()) {
                         // Update this doctor's information
                         // Format: id|doctor_id|name|faculty|phone|email|room
@@ -482,14 +545,14 @@ public class DatabaseManager {
      * @param doctorId The ID of the doctor to delete.
      * @return True if deletion was successful, false otherwise.
      */
-    public boolean deleteDoctor(long doctorId) {
+    public boolean deleteDoctor(String doctorId) {
         // First, check if there are any appointments associated with this doctor
         try (BufferedReader reader = new BufferedReader(new FileReader(DATA_APPOINTMENTS))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\" + DELIMITER);
                 if (parts.length >= 8) {
-                    long currentDoctorId = Long.parseLong(parts[1].trim()); // doctor_id is at index 1
+                    String currentDoctorId = parts[1].trim(); // doctor_id is at index 1
                     if (currentDoctorId == doctorId) {
                         System.err.println("Error: Cannot delete doctor ID " + doctorId + " because there are appointments associated with this doctor. Please reassign or delete their appointments first.");
                         return false;
@@ -509,7 +572,7 @@ public class DatabaseManager {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\" + DELIMITER);
                 if (parts.length >= 7) {
-                    long currentDoctorId = Long.parseLong(parts[1].trim());
+                    String currentDoctorId = parts[1].trim();
                     if (currentDoctorId == doctorId) {
                         doctorFound = true;
                         // Skip this line (delete the doctor)
@@ -546,9 +609,8 @@ public class DatabaseManager {
         // Format patient data into a single line, delimited by '|'
         String patientLine = String.join(DELIMITER,
             String.valueOf(newId),
-            patient.getUsername(),
+            patient.getId(),
             patient.getPassword(), // This should be the HASHED password (from your previous security discussion)
-            String.valueOf(patient.getId()),
             patient.getName(),
             patient.getPhone(),
             patient.getDOB()
@@ -558,7 +620,7 @@ public class DatabaseManager {
             writer.write(patientLine);
             writer.newLine();
             saveIdCounters(); // Persist ID counter
-            System.out.println("Patient added to file: " + patient.getUsername() + " with ID: " + newId);
+            System.out.println("Patient added to file: " + patient.getName() + " with ID: " + newId);
             return newId;
         } catch (IOException e) {
             System.err.println("Error adding patient to file: " + e.getMessage());
@@ -719,17 +781,16 @@ public class DatabaseManager {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\" + DELIMITER);
                 // Ensure enough parts for a complete patient record
-                if (parts.length >= 7) {
+                if (parts.length >= 6) {
                     try {
                         // Reconstruct Patient object (id, username, password, patient_id, name, phone, dob)
                         patients.add(new Patient(
                             Integer.parseInt(parts[0].trim()),    // id
-                            parts[1].trim(),                      // username
+                            parts[1].trim(),                      // patient_id
                             parts[2].trim(),                      // password (hashed)
-                            Long.parseLong(parts[3].trim()),      // patient_id
-                            parts[4].trim(),                      // name
-                            parts[5].trim(),                      // phone
-                            parts[6].trim()                       // dob
+                            parts[3].trim(),                      // name
+                            parts[4].trim(),                      // phone
+                            parts[5].trim()                       // dob
                         ));
                     }
                     catch (NumberFormatException e) {
@@ -742,7 +803,33 @@ public class DatabaseManager {
         }
         return patients;
     }
-
+    public Patient getPatientByNationalID(String nationalID) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_PATIENTS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER);
+                // Ensure enough parts and username matches
+                if (parts.length >= 6 && parts[1].trim().equalsIgnoreCase(nationalID)) {
+                    try {
+                        // Reconstruct Patient object (id, username, password, patient_id, name, phone, dob)
+                        return new Patient(
+                            Integer.parseInt(parts[0].trim()),    // id
+                            parts[1].trim(),                      // nationalID
+                            parts[2].trim(),                      // password (hashed)
+                            parts[3].trim(),                      // name
+                            parts[4].trim(),                      // phone
+                            parts[5].trim()                       // dob
+                        );
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error parsing patient data in file: " + line + " - " + e.getMessage());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading patients file: " + e.getMessage());
+        }
+        return null; // Patient not found
+    }
 //get patient by username
     public Patient getPatientByUsername(String username) {
         try (BufferedReader reader = new BufferedReader(new FileReader(DATA_PATIENTS))) {
@@ -750,17 +837,16 @@ public class DatabaseManager {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\" + DELIMITER);
                 // Ensure enough parts and username matches
-                if (parts.length >= 7 && parts[1].trim().equalsIgnoreCase(username)) {
+                if (parts.length >= 6 && parts[1].trim().equalsIgnoreCase(username)) {
                     try {
                         // Reconstruct Patient object (id, username, password, patient_id, name, phone, dob)
                         return new Patient(
                             Integer.parseInt(parts[0].trim()),    // id
-                            parts[1].trim(),                      // username
+                            parts[1].trim(),                      // patient_id
                             parts[2].trim(),                      // password (hashed)
-                            Long.parseLong(parts[3].trim()),      // patient_id
-                            parts[4].trim(),                      // name
-                            parts[5].trim(),                      // phone
-                            parts[6].trim()                       // dob
+                            parts[3].trim(),                      // name
+                            parts[4].trim(),                      // phone
+                            parts[5].trim()                       // dob
                         );
                     } catch (NumberFormatException e) {
                         System.err.println("Error parsing patient data in file: " + line + " - " + e.getMessage());
@@ -787,8 +873,8 @@ public class DatabaseManager {
                     try {
                         appointments.add(new Appointment(
                             Integer.parseInt(parts[0].trim()),                            // id
-                            Long.parseLong(parts[1].trim()),                             // doctor_id
-                            Long.parseLong(parts[2].trim()),                             // patient_id
+                            parts[1].trim(),                                              // doctor_id
+                            parts[2].trim(),                                              // patient_id
                             parts[3].trim(),                                             // field
                             LocalDateTime.parse(parts[6].trim(), DATE_TIME_FORMATTER),  // appointment_time
                             parts[4].trim(),                                             // doctor_name
@@ -814,7 +900,7 @@ public class DatabaseManager {
      * @param patientId The ID of the patient.
      * @return A list of Appointment objects for the given patient.
      */
-    public List<Appointment> getAppointmentsByPatient(long patientId) {
+    public List<Appointment> getAppointmentsByPatient(String patientId) {
         List<Appointment> appointments = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(DATA_APPOINTMENTS))) {
             String line;
@@ -823,12 +909,12 @@ public class DatabaseManager {
                 // Ensure enough parts for a complete appointment record (8 fields expected based on `addAppointment`)
                 if (parts.length >= 8) {
                     try {
-                        long currentAppointmentPatientId = Long.parseLong(parts[2].trim());
+                        String currentAppointmentPatientId = parts[2].trim();
                         if(currentAppointmentPatientId == patientId) {
                             appointments.add(new Appointment(
                             Integer.parseInt(parts[0].trim()),                            // id
-                            Long.parseLong(parts[1].trim()),                             // doctor_id
-                            Long.parseLong(parts[2].trim()),                             // patient_id
+                            parts[1].trim(),                             // doctor_id
+                            parts[2].trim(),                             // patient_id
                             parts[3].trim(),                                             // field
                             LocalDateTime.parse(parts[6].trim(), DATE_TIME_FORMATTER),  // appointment_time
                             parts[4].trim(),                                             // doctor_name
@@ -856,7 +942,7 @@ public class DatabaseManager {
      * @param doctorId The ID of the doctor.
      * @return A list of Appointment objects for the given doctor.
      */
-    public List<Appointment> getAppointmentsByDoctor(long doctorId) { // NEW METHOD
+    public List<Appointment> getAppointmentsByDoctor(String doctorId) { // NEW METHOD
        List<Appointment> appointments = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(DATA_APPOINTMENTS))) {
             String line;
@@ -865,12 +951,12 @@ public class DatabaseManager {
                 // Ensure enough parts for a complete appointment record (8 fields expected based on `addAppointment`)
                 if (parts.length >= 8) {
                     try {
-                        long currentAppointmentDoctorId = Long.parseLong(parts[1].trim());
+                        String currentAppointmentDoctorId = parts[1].trim();
                         if(currentAppointmentDoctorId == doctorId) {
                             appointments.add(new Appointment(
                             Integer.parseInt(parts[0].trim()),                            // id
-                            Long.parseLong(parts[1].trim()),                             // doctorId
-                            Long.parseLong(parts[2].trim()),                             // patientId
+                            parts[1].trim(),                             // doctorId
+                           parts[2].trim(),                             // patientId
                             parts[3].trim(),                                             // field
                             LocalDateTime.parse(parts[6].trim(), DATE_TIME_FORMATTER),  // appointmentTime
                             parts[4].trim(),                                             // doctorName (stored directly)
@@ -908,7 +994,7 @@ public class DatabaseManager {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\" + DELIMITER);
                 if (parts.length >= 7) {
-                    long currentPatientId = Long.parseLong(parts[3].trim());
+                    String currentPatientId = parts[3].trim();
                     String currentPhone = parts[5].trim();
                     // Check if another patient has the same phone number
                     if (currentPatientId != patient.getId() && currentPhone.equals(patient.getPhone())) {
@@ -933,7 +1019,7 @@ public class DatabaseManager {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\" + DELIMITER);
                 if (parts.length >= 7) {
-                    long currentPatientId = Long.parseLong(parts[3].trim());
+                    String currentPatientId = parts[3].trim();
                     if (currentPatientId == patient.getId()) {
                         // Update this patient's information
                         // Format: id|username|password|patient_id|name|phone|dob
@@ -984,7 +1070,7 @@ public class DatabaseManager {
      * @param patientId The ID of the patient to delete.
      * @return True if deletion was successful, false otherwise.
      */
-    public boolean deletePatient(long patientId) {
+    public boolean deletePatient(String patientId) {
         boolean patientFound = false;
         
         // First, delete the patient from the patients file
@@ -994,7 +1080,7 @@ public class DatabaseManager {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\" + DELIMITER);
                 if (parts.length >= 7) {
-                    long currentPatientId = Long.parseLong(parts[3].trim());
+                    String currentPatientId = parts[3].trim();
                     if (currentPatientId == patientId) {
                         patientFound = true;
                         // Skip this line (delete the patient)
@@ -1032,7 +1118,7 @@ public class DatabaseManager {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\" + DELIMITER);
                 if (parts.length >= 8) {
-                    long currentPatientId = Long.parseLong(parts[2].trim()); // patient_id is at index 2
+                    String currentPatientId = parts[2].trim(); // patient_id is at index 2
                     if (currentPatientId == patientId) {
                         deletedAppointments++;
                         // Skip this line (delete the appointment)

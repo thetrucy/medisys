@@ -14,10 +14,11 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox prefHeight="450.0" prefWidth="700.0" spacing="20.0" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.BookApmController">
+<VBox prefHeight="450.0" prefWidth="700.0" spacing="20.0" style="-fx-padding: 20; -fx-background-color: #ebf4fc;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.BookApmController">
    <children>
-      <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #b3e0f2; -fx-padding: 10;" />
+      <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #7db4e8; -fx-padding: 10;" />
       <HBox spacing="20.0">
          <children>
             <RadioButton fx:id="radioSelf" onAction="#onRadioChange" selected="true" text="Đặt lịch cho bản thân">
@@ -30,20 +31,35 @@
       </HBox>
       <VBox fx:id="selfBookingForm" spacing="15.0">
          <children>
-            <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Thông tin bệnh nhân" />
+            <Label prefHeight="31.0" prefWidth="203.0" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Thông tin bệnh nhân">
+               <font>
+                  <Font size="16.0" />
+               </font></Label>
             <GridPane hgap="20.0" vgap="15.0">
                <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
                   <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
                </columnConstraints>
                <children>
-                  <Label text="Họ và tên:" />
+                  <Label text="Họ và tên:">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
                   <TextField fx:id="nameFieldSelf" promptText="Nhập họ và tên" GridPane.columnIndex="1" />
-                  <Label text="Ngày tháng năm sinh:" GridPane.rowIndex="1" />
+                  <Label text="Ngày tháng năm sinh:" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
                   <TextField fx:id="dobFieldSelf" promptText="Ngày/Tháng/Năm" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Label text="Số điện thoại:" GridPane.rowIndex="2" />
+                  <Label text="Số điện thoại:" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
                   <TextField fx:id="phoneFieldSelf" promptText="Nhập số điện thoại" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Label text="Giới tính:" GridPane.rowIndex="3" />
+                  <Label text="Giới tính:" GridPane.rowIndex="3">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
                   <ComboBox fx:id="genderBoxSelf" promptText="Chọn giới tính" GridPane.columnIndex="1" GridPane.rowIndex="3">
                      <items>
                         <FXCollections fx:factory="observableArrayList">
@@ -53,9 +69,15 @@
                         </FXCollections>
                      </items>
                   </ComboBox>
-                  <Label text="Đặt ngày thăm khám:" GridPane.rowIndex="4" />
-                  <DatePicker fx:id="appointmentDateSelf" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <Label text="Đặt giờ thăm khám:" GridPane.rowIndex="5" />
+                  <Label text="Đặt ngày thăm khám:" GridPane.rowIndex="4">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
+                  <DatePicker fx:id="appointmentDateSelf" style="-fx-background-radius: 5px;" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Label text="Đặt giờ thăm khám:" GridPane.rowIndex="5">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
                   <ComboBox fx:id="appointmentTimeSelf" promptText="Chọn giờ" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                </children>
                <rowConstraints>
@@ -69,8 +91,14 @@
             </GridPane>
             <HBox alignment="CENTER_RIGHT" spacing="10.0">
                <children>
-                  <Button fx:id="backButtonSelf" onAction="#handleBackAction" style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-size: 14px;" text="Quay lại" />
-                  <Button fx:id="submitButtonSelf" onAction="#handleSubmitSelf" style="-fx-background-color: #001f4d; -fx-text-fill: white; -fx-font-size: 14px;" text="Đặt lịch" />
+                  <Button fx:id="backButtonSelf" onAction="#handleBackAction" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-font-size: 14px;" text="Quay lại">
+                     <font>
+                        <Font name="Calibri" size="12.0" />
+                     </font></Button>
+                  <Button fx:id="submitButtonSelf" onAction="#handleSubmitSelf" style="-fx-background-color: #3c83c6; -fx-font-size: 14px; -fx-background-radius: 10px;" text="Đặt lịch" textFill="WHITE">
+                     <font>
+                        <Font name="Calibri" size="12.0" />
+                     </font></Button>
                </children>
             </HBox>
          </children>
@@ -149,8 +177,8 @@
             </GridPane>
             <HBox alignment="CENTER_RIGHT" spacing="10.0">
                <children>
-                  <Button fx:id="backButtonOther" onAction="#handleBackAction" style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-size: 14px;" text="Quay lại" />
-                  <Button fx:id="submitButtonOther" onAction="#handleSubmitOther" style="-fx-background-color: #001f4d; -fx-text-fill: white; -fx-font-size: 14px;" text="Đặt lịch" />
+                  <Button fx:id="backButtonOther" onAction="#handleBackAction" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-font-size: 14px;" text="Quay lại" />
+                  <Button fx:id="submitButtonOther" onAction="#handleSubmitOther" style="-fx-background-color: #3c83c6; -fx-font-size: 14px; -fx-background-radius: 10px;" text="Đặt lịch" />
                </children>
             </HBox>
          </children>

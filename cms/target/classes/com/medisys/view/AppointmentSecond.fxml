@@ -12,8 +12,8 @@
    <children>
       <Rectangle arcHeight="20.0" arcWidth="20.0" fill="#7db4e8" height="90.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="200.0" AnchorPane.leftAnchor="85.0" AnchorPane.topAnchor="53.0" />
       <Rectangle arcHeight="20.0" arcWidth="20.0" fill="#ebf4fc" height="92.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="200.0" AnchorPane.leftAnchor="300.0" AnchorPane.topAnchor="53.0" />
-      <Rectangle arcHeight="20.0" arcWidth="20.0" fill="#ebf4fc" height="642.0" layoutX="25.0" layoutY="136.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="1163.0" />
-      <Rectangle arcHeight="30.0" arcWidth="30.0" fill="#ebf4fc" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" AnchorPane.bottomAnchor="41.0" AnchorPane.leftAnchor="48.0" AnchorPane.rightAnchor="47.0" AnchorPane.topAnchor="130.0" />
+      <Rectangle arcHeight="20.0" arcWidth="20.0" fill="#ebf4fc" height="642.0" layoutX="25.0" layoutY="136.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="1050.0" />
+      <Rectangle arcHeight="30.0" arcWidth="30.0" fill="#ebf4fc" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" />
       <Text layoutX="122.0" layoutY="100.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Đặt Lịch Khám">
          <font>
             <Font name="Arial Bold" size="18.0" />

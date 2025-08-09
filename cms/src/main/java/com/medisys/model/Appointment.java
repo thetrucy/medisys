@@ -11,19 +11,19 @@ public class Appointment {
     private LocalDateTime appointmentTime;
 
     // Constructors
-    public Appointment(long doctorId, long patientId, LocalDateTime appointmentTime) {
+    public Appointment(String doctorId, String patientId, LocalDateTime appointmentTime) {
         this.patient = new Patient(patientId, "", "", "");
         this.doctor = new Doctor(doctorId, "", "", "", "", "");
         this.appointmentTime = appointmentTime;
     }
-    public Appointment(int id, long doctorId, long patientId, String field, LocalDateTime appointmentTime, String doctorName, String patientName, String room) {
+    public Appointment(int id, String doctorId, String patientId, String field, LocalDateTime appointmentTime, String doctorName, String patientName, String room) {
         this.id = id;
         this.patient = new Patient(patientId, patientName, "", "");
         this.doctor = new Doctor(doctorId, doctorName, field, "", "", room);
         this.appointmentTime = appointmentTime;
     }
 
-    public Appointment(long doctorId, long patientId, String field, LocalDateTime appointmentTime, String doctorName, String patientName, String room) {
+    public Appointment(String doctorId, String patientId, String field, LocalDateTime appointmentTime, String doctorName, String patientName, String room) {
         this.patient = new Patient(patientId, patientName, "", "");
         this.doctor = new Doctor(doctorId, doctorName, field, "", "", room);
         this.appointmentTime = appointmentTime;
@@ -34,7 +34,7 @@ public class Appointment {
         return id;
     }
 
-    public long getPatientId() {
+    public String getPatientId() {
         return patient.getId();
     }
 
@@ -46,7 +46,7 @@ public class Appointment {
         return appointmentTime;
     }
 
-    public long getDoctorId() {
+    public String getDoctorId() {
         return doctor.getId();
     }
 

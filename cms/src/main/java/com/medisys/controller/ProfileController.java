@@ -7,6 +7,7 @@ import java.io.IOException;
 import com.medisys.Main;
 import com.medisys.model.Patient;
 
+import javafx.animation.ScaleTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +17,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
@@ -81,7 +83,13 @@ public class ProfileController {
     }
 
     @FXML
-    private void handleProfileEditChanges() {
+    private void handleProfileEditChanges(javafx.event.ActionEvent event) {
+    	Button clicked = (Button) event.getSource();
+    	
+    	if (clicked == profileEditButton) {
+	        animatePop(profileEditButton);
+	    }
+    	
         // Hiển thị hộp thoại xác nhận
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Xác nhận");
@@ -106,7 +114,13 @@ public class ProfileController {
     }
 
     @FXML
-    void handleProfileSaveChanges(ActionEvent event) {
+    void handleProfileSaveChanges(javafx.event.ActionEvent event) {
+    	Button clicked = (Button) event.getSource();
+    	
+    	if (clicked == profileSaveButton) {
+	        animatePop(profileSaveButton);
+	    }
+    	
         String name = nameField.getText();
         String phone = phoneField.getText();
         // String dob = dobPicker.getValue() != null ? dobPicker.getValue().toString() : "";
@@ -177,18 +191,29 @@ public class ProfileController {
     @FXML
     public void initialize() {
         // Bạn có thể load thông tin người dùng hiện tại ở đây{
-        // --- Mô phỏng Đăng nhập: Tìm bệnh nhân bằng username ---
+        // --- Mô phỏng Đăng nhập: Tìm bệnh nhân bằng id ---
         
-        String demoUsername = "apple";
+        String demoID = "079000000000"; // ID giả lập cho bệnh nhân demo
         
         // Gọi phương thức mới để tìm bệnh nhân
-        currentPatient = DatabaseManager.getInstance().getPatientByUsername(demoUsername);
+        currentPatient = DatabaseManager.getInstance().getPatientByNationalID(demoID);
         
         if (currentPatient != null) {
             setPatient(currentPatient);
         } else {
-            System.err.println("Không tìm thấy bệnh nhân demo '" + demoUsername + "' trong cơ sở dữ liệu.");
+            System.err.println("Không tìm thấy bệnh nhân demo '" + demoID + "' trong cơ sở dữ liệu.");
             
         }
+    }
+    
+    private void animatePop(Button btn) {
+        ScaleTransition st = new ScaleTransition(Duration.millis(150), btn);
+        st.setFromX(1.0);
+        st.setFromY(1.0);
+        st.setToX(1.09);
+        st.setToY(1.09);
+        st.setAutoReverse(true);
+        st.setCycleCount(2);
+        st.play();
     }
 }

@@ -6,6 +6,7 @@ import com.medisys.model.Appointment;
 import com.medisys.model.Patient;
 import com.medisys.model.Doctor;
 
+import javafx.animation.ScaleTransition;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,6 +24,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
@@ -77,6 +79,7 @@ public class BookApmController implements Initializable {
     @FXML private DatePicker appointmentDateSelf;
     @FXML private ComboBox<String> appointmentTimeSelf;
     @FXML private Button submitButtonSelf;
+    @FXML private Button backButtonSelf;
 
     //other booking form fields
     @FXML private TextField patientIdField; //----new
@@ -90,6 +93,7 @@ public class BookApmController implements Initializable {
     @FXML private DatePicker appointmentDateOther;
     @FXML private ComboBox<String> appointmentTimeOther;
     @FXML private Button submitButtonOther;
+    @FXML private Button backButtonOther;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -139,9 +143,15 @@ public class BookApmController implements Initializable {
     }
 
     @FXML
-    private void handleBackAction(ActionEvent event) throws IOException {
+    private void handleBackAction(javafx.event.ActionEvent event) throws IOException {
+    	Button clicked = (Button) event.getSource();
+    	
+    	if (clicked == backButtonSelf) {
+    		animatePop(backButtonSelf);
+    	}
+    	
         try {
-            mainController.loadAppointmentFirstView();
+            mainController.loadAppointmentFirstView(event);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -358,7 +368,6 @@ public class BookApmController implements Initializable {
         }
     }
 
-    
 
     @FXML
     private void onRadioChange(ActionEvent event) {
@@ -383,9 +392,15 @@ public class BookApmController implements Initializable {
         otherBookingForm.setManaged(true);
     }
 
-    @SuppressWarnings("unused")
+	@SuppressWarnings("unused")
 	@FXML
     private void handleSubmitSelf(ActionEvent event) {
+		Button clicked = (Button) event.getSource();
+		
+		if (clicked == submitButtonSelf) {
+			animatePop(submitButtonSelf);
+		}
+		
         if (validateSelfBookingForm()) {
             try {
                 String name = nameFieldSelf.getText().trim();
@@ -431,7 +446,7 @@ public class BookApmController implements Initializable {
                     Appointment appointment = new Appointment(
                         appointmentID++,
                         selectedDoctor.getId(),
-                        id,
+                        patient.getId(),
                         selectedDoctor.getFaculty(),
                         appointmentDateTime,
                         selectedDoctor.getName(),
@@ -465,9 +480,15 @@ public class BookApmController implements Initializable {
 
     @FXML
     private void handleSubmitOther(ActionEvent event) {
+    	Button clicked = (Button) event.getSource();
+    	
+    	if (clicked == submitButtonOther) {
+    		animatePop(submitButtonOther);
+    	}
+    	
         if (validateOtherBookingForm()) {
             try {
-                String idText = patientIdField.getText().trim();
+                String patientId = patientIdField.getText().trim();
                 String patientName = patientNameField.getText().trim();
                 String patientDob = patientDobField.getText().trim();
                 String patientPhone = patientPhoneField.getText().trim();
@@ -478,7 +499,7 @@ public class BookApmController implements Initializable {
                 String appointmentTime = appointmentTimeOther.getValue();
 
                 // Validate required fields
-                if (idText.isEmpty() || patientName.isEmpty() || patientPhone.isEmpty() || 
+                if (patientId.isEmpty() || patientName.isEmpty() || patientPhone.isEmpty() || 
                     relationship == null || guardName.isEmpty() || guardPhone.isEmpty() ||
                     appointmentDate == null || appointmentTime == null) {
                     showErrorAlert("Thiếu thông tin", "Vui lòng điền đầy đủ thông tin");
@@ -486,7 +507,6 @@ public class BookApmController implements Initializable {
                 }
 
                 // Create and save patient
-                Long patientId = Long.parseLong(idText);
                 Patient patient = new Patient(patientId, patientName, patientPhone, patientDob);
                 patient.setGuard(relationship, guardName, guardPhone);
                 
@@ -747,5 +767,27 @@ public class BookApmController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+    
+    
+    @SuppressWarnings("unused")
+	private void handleButtonClick(javafx.event.ActionEvent event) {
+        Button clicked = (Button) event.getSource();
+        
+        if (clicked == backButtonSelf || clicked == submitButtonSelf ||
+            clicked == backButtonOther || clicked == submitButtonOther) {
+            animatePop(clicked);
+        }
+    }
+    
+    private void animatePop(Button btn) {
+        ScaleTransition st = new ScaleTransition(Duration.millis(150), btn);
+        st.setFromX(1.0);
+        st.setFromY(1.0);
+        st.setToX(1.09);
+        st.setToY(1.09);
+        st.setAutoReverse(true);
+        st.setCycleCount(2);
+        st.play();
     }
 }

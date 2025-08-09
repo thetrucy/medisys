@@ -13,7 +13,7 @@ import java.net.URL; // Import URL class
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/Main.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/Login.fxml"));
         Scene scene = new Scene(loader.load());
         primaryStage.setScene(scene);
         primaryStage.setTitle("Clinic App");

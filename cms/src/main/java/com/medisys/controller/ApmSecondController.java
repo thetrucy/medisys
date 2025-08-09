@@ -32,7 +32,7 @@ public class ApmSecondController {
     
     public void switchToScene1(ActionEvent event) throws IOException {
         try {
-            mainController.loadAppointmentFirstView();
+            mainController.loadAppointmentFirstView(event);
         } catch (Exception e) {
             e.printStackTrace();
         }
