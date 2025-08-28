@@ -20,10 +20,6 @@ public class MainController {
         loadView("AppointmentFirst.fxml");
     }
 
-    public void loadAppointmentSecondView() throws Exception {
-        loadView("AppointmentSecond.fxml");
-    }
-
     // public void loadBookingView() throws Exception {
     //     loadView("BookAppointment.fxml");
     // }
@@ -62,10 +58,6 @@ public class MainController {
         Object controller = loader.getController();
         if (controller instanceof ApmFirstController) {
             ((ApmFirstController) controller).setMainController(this);
-        }
-
-        if (controller instanceof ApmSecondController) {
-            ((ApmSecondController) controller).setMainController(this);
         }
 
         // The check for BookApmController is no longer needed here,

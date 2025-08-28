@@ -118,14 +118,6 @@ public class ApmFirstController {
             e.printStackTrace();
         }
 	}
-	
-	public void switchToScene2(ActionEvent event) throws IOException {
-        try {
-            mainController.loadAppointmentSecondView();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-	}
 
     public void switchToAppointmentBooking(Doctor selectedDoctor, javafx.scene.input.MouseEvent event) throws IOException {
         try {
@@ -211,16 +203,5 @@ public class ApmFirstController {
         st.setAutoReverse(true);
         st.setCycleCount(2);
         st.play();
-    }
-
-    @FXML
-    private void onViewProfileButtonClick(ActionEvent event) throws IOException {
-        try {
-            // switchToScene2(event);
-            mainController.loadAppointmentSecondView();
-        } catch (Exception e) {//(IOException e) {
-            // System.err.println("Error switching to profile scene: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 }
