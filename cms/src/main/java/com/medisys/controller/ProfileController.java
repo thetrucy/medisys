@@ -126,11 +126,42 @@ public class ProfileController {
         // String dob = dobPicker.getValue() != null ? dobPicker.getValue().toString() : "";
         // String email = emailField.getText();
 
+<<<<<<< Updated upstream
         // Cập nhật đối tượng hiện tại
         currentPatient.setName(name);
         currentPatient.setPhone(phone);
 
         // Gọi updatePatient từ DatabaseManager
+=======
+        // 1. Get the current values from the UI components
+        String newName = nameField.getText();
+        String newPhone = phoneField.getText().trim();
+        String newDob = dobPicker.getValue() != null ? dobPicker.getValue().toString() : "";
+
+        // --- Phone validation ---
+        if (!newPhone.matches("\\d{10,11}")) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Số điện thoại phải gồm 10 hoặc 11 chữ số.");
+            return;
+        }
+
+        // 2. Check for changes BEFORE updating the object
+        if (newName.equals(currentPatient.getName()) && 
+            newPhone.equals(currentPatient.getPhone()) && 
+            newDob.equals(currentPatient.getDOB())) {
+            
+            showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Bạn chưa thay đổi thông tin nào.");
+            setFieldsDisabled(true);
+            return;
+        }
+        
+        // 3. Update the currentPatient object with new values
+        currentPatient.setName(newName);
+        currentPatient.setPhone(newPhone);
+        currentPatient.setDOB(newDob);
+        currentPatient.setGender(selectedGender);
+
+        // 4. Call updatePatient from DatabaseManager
+>>>>>>> Stashed changes
         boolean success = dbManager.updatePatient(currentPatient);
 
         nameField.setDisable(true);
@@ -173,6 +204,7 @@ public class ProfileController {
             alert.showAndWait();
         }    
     }
+
 
     @FXML
     public void setPatient(Patient patient) {

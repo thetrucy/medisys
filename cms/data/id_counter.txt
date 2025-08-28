@@ -1,4 +1,11 @@
+<<<<<<< Updated upstream
 user=1
 patient=6
 doctor=6
 appointment=10
+=======
+user=9
+patient=3
+doctor=6
+appointment=3
+>>>>>>> Stashed changes
