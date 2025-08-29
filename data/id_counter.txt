@@ -1,4 +1,4 @@
 user=10
 patient=5
 doctor=6
-appointment=3
+appointment=4

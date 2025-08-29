@@ -2,6 +2,7 @@
 
 <?import java.lang.String?>
 <?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
@@ -15,18 +16,32 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <VBox prefHeight="450.0" prefWidth="700.0" spacing="20.0" style="-fx-padding: 20; -fx-background-color: #ebf4fc;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.BookApmController">
    <children>
-      <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #7db4e8; -fx-padding: 10;" />
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Thông tin đặt lịch">
+         <font>
+            <Font name="Arial Bold" size="36.0" />
+         </font>
+         <VBox.margin>
+            <Insets bottom="10.0" />
+         </VBox.margin>
+      </Text>
       <HBox spacing="20.0">
          <children>
             <RadioButton fx:id="radioSelf" onAction="#onRadioChange" selected="true" text="Đặt lịch cho bản thân">
                <toggleGroup>
                   <ToggleGroup fx:id="appointmentGroup" />
                </toggleGroup>
+               <font>
+                  <Font size="14.0" />
+               </font>
             </RadioButton>
-            <RadioButton fx:id="radioOther" onAction="#onRadioChange" text="Đặt lịch cho người khác" toggleGroup="$appointmentGroup" />
+            <RadioButton fx:id="radioOther" onAction="#onRadioChange" text="Đặt lịch cho người khác" toggleGroup="$appointmentGroup">
+               <font>
+                  <Font size="14.0" />
+               </font></RadioButton>
          </children>
       </HBox>
       <VBox fx:id="selfBookingForm" spacing="15.0">
@@ -167,6 +182,7 @@
                   <ComboBox fx:id="appointmentTimeOther" promptText="Chọn giờ" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                </children>
                <rowConstraints>
+                  <RowConstraints />
                   <RowConstraints />
                   <RowConstraints />
                   <RowConstraints />
