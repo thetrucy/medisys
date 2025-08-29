@@ -11,7 +11,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.layout.Region?>
 
-<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.MainController">
+<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1280" prefHeight="720" fx:controller="com.medisys.controller.MainController">
 
     <left>
         <VBox alignment="TOP_CENTER" prefHeight="192.0" prefWidth="151.0" spacing="15.0" style="-fx-background-color: #7db4e8;">

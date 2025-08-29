@@ -13,9 +13,14 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/Login.fxml"));
-        Scene scene = new Scene(loader.load());
+        double preferredWidth = 1280;
+        double preferredHeight = 720;
+        Scene scene = new Scene(loader.load(), preferredWidth, preferredHeight);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Medisys");
+        primaryStage.setMinWidth(1024);
+        primaryStage.setMinHeight(768);
+
         primaryStage.show();
     }
 
