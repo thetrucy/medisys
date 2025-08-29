@@ -167,7 +167,8 @@ public class ProfileController {
 
         if (newName.equals(currentPatient.getName()) && 
             newPhone.equals(currentPatient.getPhone()) && 
-            newDob.equals(currentPatient.getDOB())) {
+            newDob.equals(currentPatient.getDOB()) &&
+            selectedGender.equals(currentPatient.getGender())) {
             
             showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Bạn chưa thay đổi thông tin nào.");
             setFieldsDisabled(true);

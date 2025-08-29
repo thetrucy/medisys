@@ -1,4 +1,0 @@
-user=9
-patient=3
-doctor=6
-appointment=2

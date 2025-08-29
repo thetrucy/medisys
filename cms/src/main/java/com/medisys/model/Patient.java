@@ -60,9 +60,9 @@ public class Patient extends User{
     }
     
     // Constructor dùng khi đăng ký tài khoản mới (từ LoginAndRegisterController)
-    private Patient(String nationalId, String password, String name, String phone, String gender) {
+    private Patient(String nationalId, String password, String name, String phone, String gender, String dob) {
         super(nationalId, password, name, phone, false);
-        this.dob = "";
+        this.dob = (dob != null) ? dob : "";
         this.gender = (gender != null) ? gender : "";
         this.guardianRela = "";
         this.guardianName = "";
@@ -88,8 +88,8 @@ public class Patient extends User{
     /**
      * Creates a new Patient instance for the registration process.
      */
-    public static Patient createForRegistration(String nationalId, String password, String name, String phone, String gender) {
-        return new Patient(nationalId, password, name, phone, gender);
+    public static Patient createForRegistration(String nationalId, String password, String name, String phone, String gender, String dob) {
+        return new Patient(nationalId, password, name, phone, gender, dob);
     }
 
     /**

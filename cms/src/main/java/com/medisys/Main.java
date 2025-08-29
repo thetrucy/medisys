@@ -20,8 +20,6 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-        // THÊM DÒNG NÀY VÀO ĐỂ KIỂM TRA
-        com.medisys.util.DatabaseManager.getInstance();
         launch(args);
     }
 }

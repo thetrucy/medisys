@@ -1,6 +1,9 @@
 package com.medisys.controller;
 
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import com.medisys.model.Patient;
 import com.medisys.model.User;
 
@@ -10,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -39,6 +43,10 @@ public class LoginAndRegisterController {
     // --- THÊM MỚI ---
     @FXML
     private ComboBox<String> genderBoxRegister;
+    @FXML
+    private DatePicker dobPickerRegister;
+    @FXML
+    private javafx.scene.control.Button btnRegister;
     // -----------------
 
     public void setLoginController(LoginController loginController) {
@@ -55,28 +63,59 @@ public class LoginAndRegisterController {
 
     @FXML
     private void register(ActionEvent event) {
-        String id = txtId.getText().trim();
-        String password = txtPass.getText().trim();
-        String fullName = txtUser.getText().trim();
-        String phone = txtPhone.getText().trim();
-        boolean isDoctor = checkboxDoctor.isSelected();
+        // Vô hiệu hóa nút ngay khi phương thức bắt đầu
+        btnRegister.setDisable(true);
 
-        // --- THAY ĐỔI ---
-        // Lấy giá trị giới tính từ ComboBox
-        String gender = genderBoxRegister.getValue();
+        try {
+            // --- THÊM MỚI: Chặn đăng ký bác sĩ ---
+            if (checkboxDoctor.isSelected()) {
+                loginController.showMessage(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng đăng ký dành cho bác sĩ đang được phát triển. Vui lòng thử lại sau.");
+                return; // Dừng thực thi ngay tại đây
+            }
+            // ------------------------------------
 
-        // Kiểm tra nếu giới tính chưa được chọn
-        if (gender == null || gender.isEmpty()) {
-            loginController.showMessage(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn giới tính.");
-            return;
-        }
+            String id = txtId.getText().trim();
+            String password = txtPass.getText().trim();
+            String fullName = txtUser.getText().trim();
+            String phone = txtPhone.getText().trim();
+            // boolean isDoctor = checkboxDoctor.isSelected();
+            String gender = genderBoxRegister.getValue();
+            LocalDate dobValue = dobPickerRegister.getValue();
 
-        // Bác sĩ không cần giới tính, chỉ bệnh nhân mới cần
-        if (checkboxDoctor.isSelected()) {
-            // Logic tạo tài khoản bác sĩ (nếu cần)
-        } else {
-            User user = Patient.createForRegistration(id, password, fullName, phone, gender);
-            loginController.registerUser(user);
+            // Kiểm tra nếu giới tính chưa được chọn
+            if (gender == null || gender.isEmpty()) {
+                loginController.showMessage(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn giới tính.");
+                return;
+            }
+
+            // --- THÊM MỚI: Lấy và xác thực ngày sinh ---
+            String dobString = ""; // Khởi tạo chuỗi ngày sinh rỗng
+
+            // Kiểm tra nếu ngày sinh chưa được chọn
+            if (dobValue == null) {
+                loginController.showMessage(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn ngày sinh.");
+                return;
+            }
+            // Kiểm tra ngày sinh không được là ngày trong tương lai
+            if (dobValue.isAfter(LocalDate.now())) {
+                loginController.showMessage(Alert.AlertType.ERROR, "Lỗi", "Ngày sinh không hợp lệ (không thể là một ngày trong tương lai).");
+                return;
+            }
+
+            // Định dạng ngày sinh thành chuỗi "yyyy-MM-dd" để lưu trữ
+            dobString = dobValue.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            // ---------------------------------------------
+
+            // Bác sĩ không cần giới tính, chỉ bệnh nhân mới cần
+            if (checkboxDoctor.isSelected()) {
+                // Logic tạo tài khoản bác sĩ (nếu cần)
+            } else {
+                User user = Patient.createForRegistration(id, password, fullName, phone, gender, dobString);
+                loginController.registerUser(user);
+            }
+        } finally {
+            // Luôn bật lại nút sau khi tất cả xử lý đã xong (kể cả khi có lỗi hoặc return sớm)
+            btnRegister.setDisable(false);
         }
     }
 
@@ -96,5 +135,4 @@ public class LoginAndRegisterController {
         registerBox.setVisible(show);
         loginBox.setVisible(!show);
     }
-
 }

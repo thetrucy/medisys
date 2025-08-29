@@ -474,6 +474,8 @@ public class BookApmController implements Initializable {
     @FXML
     private void handleSubmitOther(ActionEvent event) {
         if (validateOtherBookingForm()) {
+            // Vô hiệu hóa nút ngay khi bắt đầu xử lý
+            submitButtonOther.setDisable(true);
             try {
                 String patientId = patientIdField.getText().trim();
                 String patientName = patientNameField.getText().trim();
@@ -493,12 +495,33 @@ public class BookApmController implements Initializable {
                     return;
                 }
 
+                // **1. THÊM MỚI: KIỂM TRA NẾU NGƯỜI DÙNG ĐẶT HỘ CHO CHÍNH MÌNH**
+                if (patientId.equals(curPatient.getId())) {
+                    showErrorAlert("Lỗi logic", "Bạn không thể dùng chức năng 'Đặt cho người khác' để đặt lịch cho chính mình. Vui lòng chọn 'Đặt cho bản thân'.");
+                    return; // Dừng lại ngay lập tức
+                }
+
                 // Create and save patient
                 Patient patient = Patient.createForOtherBooking(patientId, patientName, guardPhone, patientDob, patientGender);
                 patient.setGuard(relationship, guardName, guardPhone);
                 
-                if (dbManager.getPatientByNationalID(patientId) == null) {
-                    dbManager.addPatient(patient);
+                // if (dbManager.getPatientByNationalID(patientId) == null) {
+                //     dbManager.addPatient(patient);
+                // }
+                // Kiểm tra xem bệnh nhân đã tồn tại chưa
+                Patient existingPatient = dbManager.getPatientByNationalID(patientId);
+
+                if (existingPatient == null) {
+                    // Nếu chưa tồn tại, tạo mới và thêm vào DB
+                    System.out.println("Bệnh nhân chưa tồn tại, tạo mới...");
+                    Patient newPatient = Patient.createForOtherBooking(patientId, patientName, "", patientDob, patientGender); // Phone có thể để trống
+                    newPatient.setGuard(relationship, guardName, guardPhone);
+                    dbManager.addPatient(newPatient);
+                } else {
+                    // Nếu đã tồn tại, cập nhật thông tin người giám hộ cho bệnh nhân đó
+                    System.out.println("Bệnh nhân đã tồn tại, cập nhật người giám hộ...");
+                    existingPatient.setGuard(relationship, guardName, guardPhone);
+                    dbManager.updatePatient(existingPatient); // Dùng hàm update đã có
                 }
 
                 // Verify doctor selected
@@ -538,6 +561,9 @@ public class BookApmController implements Initializable {
             } catch (Exception e) {
                 showErrorAlert("Lỗi không mong muốn", "Đã xảy ra lỗi: " + e.getMessage());
                 e.printStackTrace();
+            } finally {
+                // Bất kể thành công hay thất bại, luôn bật lại nút sau khi xong
+                submitButtonOther.setDisable(false); 
             }
         }
     }

@@ -16,14 +16,14 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<VBox prefHeight="400.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.ProfileController">
+<VBox prefHeight="400.0" prefWidth="600.0" spacing="20.0" style="-fx-background-color: #ebf4fc;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.ProfileController">
    <padding>
       <Insets bottom="20" left="20" right="20" top="20" />
    </padding>
    <children>
       <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Hồ sơ người dùng">
          <font>
-            <Font name="System Bold" size="24.0" />
+            <Font name="Arial Bold" size="42.0" />
          </font>
       </Text>
       <VBox style="-fx-background-color: #ebf4fc;">

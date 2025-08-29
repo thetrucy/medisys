@@ -16,7 +16,7 @@
    <children>
       <VBox fx:id="registerBox" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="15.0">
          <children>
-            <Label text="Tạo Tài Khoản" textFill="#1d3557">
+            <Label text="Đăng ký thông tin tài khoản" textFill="#1d3557">
                <font>
                   <Font name="System Bold" size="25.0" />
                </font>

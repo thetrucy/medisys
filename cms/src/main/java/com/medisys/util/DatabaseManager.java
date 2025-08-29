@@ -194,12 +194,10 @@ public class DatabaseManager {
 
         // SMART CHANGE: Sử dụng factory method để tạo patient và setDOB thủ công
         // Cách này đảm bảo dữ liệu khởi tạo đầy đủ và đúng chuẩn
-        Patient patient1 = Patient.createForRegistration("079123123123", "pass123A", "John Doe", "1234567890", "Nam");
-        patient1.setDOB("1990-01-01");
+        Patient patient1 = Patient.createForRegistration("079123123123", "pass123A", "John Doe", "1234567890", "Nam", "1990-01-01");
         initialPatients.add(patient1);
 
-        Patient patient2 = Patient.createForRegistration("079123412345", "pass123T", "Jane Smith", "2345678901", "Nữ");
-        patient2.setDOB("1985-05-15");
+        Patient patient2 = Patient.createForRegistration("079123412345", "pass123T", "Jane Smith", "2345678901", "Nữ", "1985-05-15");
         initialPatients.add(patient2);
 
 
@@ -1089,11 +1087,15 @@ public class DatabaseManager {
         
         // Write all lines back to the file
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_PATIENTS))) {
-            for (int i = 0; i < lines.size(); i++) {
-                writer.write(lines.get(i));
-                if (i < lines.size() - 1) {
-                    writer.newLine();
-                }
+            // for (int i = 0; i < lines.size(); i++) {
+            //     writer.write(lines.get(i));
+            //     if (i < lines.size() - 1) {
+            //         writer.newLine();
+            //     }
+            // }
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine(); // <-- Luôn thêm ký tự xuống dòng sau mỗi dòng
             }
             System.out.println("Patient ID " + patient.getId() + " updated successfully.");
             return true;
