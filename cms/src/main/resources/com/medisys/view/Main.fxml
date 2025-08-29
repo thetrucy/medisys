@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.Region?>
 
 <BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.MainController">
 
@@ -74,6 +75,25 @@
                      </image>
                   </ImageView>
                       <Button fx:id="UserButton" onAction="#loadProfileView" prefHeight="39.0" prefWidth="130.0" style="-fx-text-fill: white; -fx-background-color: #2C3E50; -fx-background-radius: 10px;" text="Hồ sơ">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+            </HBox>
+           <Region VBox.vgrow="ALWAYS" />
+            <HBox>
+
+               <children>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/logout.png" />
+                     </image>
+                  </ImageView>
+                      <Button fx:id="LogoutButton" onAction="#handleLogout" prefHeight="39.0" prefWidth="130.0" style="-fx-text-fill: white; -fx-background-color: #2C3E50; -fx-background-radius: 10px;" text="Đăng xuất">
                      <font>
                         <Font size="18.0" />
                      </font>
