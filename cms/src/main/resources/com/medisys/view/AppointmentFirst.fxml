@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane style="-fx-background-color: #ebf4fc;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.ApmFirstController">
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+   <top>
+      <VBox spacing="10.0" BorderPane.alignment="CENTER">
+         <children>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Đặt Lịch Khám">
+               <font>
+                  <Font name="Arial Bold" size="42.0" />
+               </font>
+            </Text>
+            <Text text="Tìm và đặt lịch thăm khám">
+               <font>
+                  <Font name="Calibri" size="30.0" />
+               </font>
+            </Text>
+         </children>
+         <BorderPane.margin>
+            <Insets bottom="20.0" />
+         </BorderPane.margin>
+      </VBox>
+   </top>
+   <center>
+      <VBox spacing="15.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/search.png" />
+                     </image>
+                  </ImageView>
+                  <Text fill="#434343" text="Tìm kiếm bằng:">
+                     <font>
+                        <Font name="Calibri" size="24.0" />
+                     </font>
+                  </Text>
+                  <Button fx:id="buttonA" mnemonicParsing="false" onAction="#handleButtonClick" prefHeight="40.0" prefWidth="100.0" style="-fx-background-radius: 20px; -fx-background-color: #3c83c6;" text="Tên bác sĩ" textFill="WHITE" />
+                  <Button fx:id="buttonB" mnemonicParsing="false" onAction="#handleButtonClick" prefHeight="40.0" prefWidth="120.0" style="-fx-background-radius: 20px; -fx-background-color: white;" text="Chuyên khoa" />
+               </children>
+            </HBox>
+            <TextField fx:id="FilterField" prefHeight="35.0" promptText="Nhập tên bác sĩ hoặc chuyên khoa để tìm kiếm..." style="-fx-background-color: #ffffff; -fx-background-radius: 5px;">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </TextField>
+            <Text text="Bác sĩ đề xuất">
+               <font>
+                  <Font name="Calibri" size="36.0" />
+               </font>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </Text>
+            <TableView fx:id="doctorTable" VBox.vgrow="ALWAYS">
+               <columns>
+                  <TableColumn fx:id="Id" prefWidth="75.0" text="ID" />
+                  <TableColumn fx:id="Name" prefWidth="250.0" text="Họ Và Tên" />
+                  <TableColumn fx:id="Faculty" prefWidth="180.0" text="Chuyên khoa" />
+                  <TableColumn fx:id="Gmail" prefWidth="300.0" text="Gmail" />
+                  <TableColumn fx:id="Room" prefWidth="150.0" text="Phòng" />
+               </columns>
+                <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                </columnResizePolicy>
+            </TableView>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<VBox prefHeight="450.0" prefWidth="730.0" spacing="10.0" style="-fx-background-color: #ebf4fc;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.UpcomingApmController">
+   <children>
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Lịch khám sắp tới">
+         <font>
+            <Font name="Arial Bold" size="42.0" />
+         </font>
+      </Text>
+      <HBox>
+         <children>
+            <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@icons/search.png" />
+               </image>
+            </ImageView>
+            <TextField fx:id="FilterField" prefHeight="26.0" prefWidth="760.0" promptText="Tìm Kiếm" style="-fx-background-color: #ffffff; -fx-background-radius: 5px;">
+               <font>
+                  <Font size="18.0" />
+               </font>
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+               <HBox.margin>
+                  <Insets left="10.0" top="10.0" />
+               </HBox.margin>
+            </TextField>
+         </children>
+         <VBox.margin>
+            <Insets top="20.0" />
+         </VBox.margin>
+      </HBox>
+      <HBox prefHeight="38.0" prefWidth="780.0" />
+      <TableView fx:id="appointmentTable" prefHeight="395.0" prefWidth="848.0" style="-fx-border-color: black; -fx-border-width: 3px;">
+         <columns>
+            <TableColumn fx:id="dateColumn" prefWidth="83.5" style="-fx-background-color: #b2c0cd; -fx-border-color: black; -fx-border-width: 1px;" text="Ngày" />
+            <TableColumn fx:id="patientColumn" prefWidth="161.0" style="-fx-background-color: #b2c0cd; -fx-border-color: black; -fx-border-width: 1px;" text="Bệnh nhân" />
+            <TableColumn fx:id="roomColumn" prefWidth="46.5" style="-fx-background-color: #b2c0cd; -fx-border-color: black; -fx-border-width: 1px;" text="Phòng" />
+            <TableColumn fx:id="departmentColumn" prefWidth="121.5" style="-fx-background-color: #b2c0cd; -fx-border-color: black; -fx-border-width: 1px;" text="Khoa" />
+            <TableColumn fx:id="doctorColumn" minWidth="0.0" prefWidth="204.5" style="-fx-background-color: #b2c0cd; -fx-border-color: black; -fx-border-width: 1px;" text="Bác sĩ" />
+            <TableColumn fx:id="notesColumn" prefWidth="69.0" style="-fx-background-color: #b2c0cd; -fx-border-color: black; -fx-border-width: 1px;" text="Ghi chú" />
+         </columns>
+      </TableView>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</VBox>

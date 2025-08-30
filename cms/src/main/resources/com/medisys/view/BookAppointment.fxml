@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<VBox prefHeight="450.0" prefWidth="700.0" spacing="20.0" style="-fx-padding: 20; -fx-background-color: #ebf4fc;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.BookApmController">
+   <children>
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Thông tin đặt lịch">
+         <font>
+            <Font name="Arial Bold" size="36.0" />
+         </font>
+         <VBox.margin>
+            <Insets bottom="10.0" />
+         </VBox.margin>
+      </Text>
+      <HBox spacing="20.0">
+         <children>
+            <RadioButton fx:id="radioSelf" onAction="#onRadioChange" selected="true" text="Đặt lịch cho bản thân">
+               <toggleGroup>
+                  <ToggleGroup fx:id="appointmentGroup" />
+               </toggleGroup>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </RadioButton>
+            <RadioButton fx:id="radioOther" onAction="#onRadioChange" text="Đặt lịch cho người khác" toggleGroup="$appointmentGroup">
+               <font>
+                  <Font size="14.0" />
+               </font></RadioButton>
+         </children>
+      </HBox>
+      <VBox fx:id="selfBookingForm" spacing="15.0">
+         <children>
+            <Label prefHeight="31.0" prefWidth="203.0" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Thông tin bệnh nhân">
+               <font>
+                  <Font size="16.0" />
+               </font></Label>
+            <GridPane hgap="20.0" vgap="15.0">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
+               </columnConstraints>
+               <children>
+                  <Label text="Họ và tên:">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
+                  <TextField fx:id="nameFieldSelf" promptText="Nhập họ và tên" GridPane.columnIndex="1" />
+                  <Label text="Ngày tháng năm sinh:" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
+                  <TextField fx:id="dobFieldSelf" promptText="Ngày/Tháng/Năm" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="Số điện thoại:" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
+                  <TextField fx:id="phoneFieldSelf" promptText="Nhập số điện thoại" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label text="Giới tính:" GridPane.rowIndex="3">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
+                  <ComboBox fx:id="genderBoxSelf" promptText="Chọn giới tính" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                     <items>
+                        <FXCollections fx:factory="observableArrayList">
+                           <String fx:value="Nam" />
+                           <String fx:value="Nữ" />
+                           <String fx:value="Khác" />
+                        </FXCollections>
+                     </items>
+                  </ComboBox>
+                  <Label text="Đặt ngày thăm khám:" GridPane.rowIndex="4">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
+                  <DatePicker fx:id="appointmentDateSelf" style="-fx-background-radius: 5px;" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Label text="Đặt giờ thăm khám:" GridPane.rowIndex="5">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
+                  <ComboBox fx:id="appointmentTimeSelf" promptText="Chọn giờ" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+               </children>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+               </rowConstraints>
+            </GridPane>
+            <HBox alignment="CENTER_RIGHT" spacing="10.0">
+               <children>
+                  <Button fx:id="backButtonSelf" onAction="#handleBackAction" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-font-size: 14px;" text="Quay lại">
+                     <font>
+                        <Font name="Calibri" size="12.0" />
+                     </font></Button>
+                  <Button fx:id="submitButtonSelf" onAction="#handleSubmitSelf" style="-fx-background-color: #3c83c6; -fx-font-size: 14px; -fx-background-radius: 10px;" text="Đặt lịch" textFill="WHITE">
+                     <font>
+                        <Font name="Calibri" size="12.0" />
+                     </font></Button>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <VBox fx:id="otherBookingForm" managed="false" spacing="15.0" visible="false">
+         <children>
+            <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Thông tin bệnh nhân" />
+            <GridPane hgap="20.0" vgap="15.0">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
+               </columnConstraints>
+               <children>
+                  <Label text="Họ và tên bệnh nhân:" />
+                  <TextField fx:id="patientNameField" promptText="Nhập họ và tên bệnh nhân" GridPane.columnIndex="1" />
+                  <Label text="Ngày tháng năm sinh:" GridPane.rowIndex="1" />
+                  <TextField fx:id="patientDobField" promptText="Ngày/Tháng/Năm" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="CCCD/CMND bệnh nhân:" GridPane.rowIndex="2" />
+                  <TextField fx:id="patientIdField" promptText="Nhập CCCD/CMND bệnh nhân" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label text="Giới tính:" GridPane.rowIndex="3" />
+                  <ComboBox fx:id="patientGenderBox" promptText="Chọn giới tính" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                     <items>
+                        <FXCollections fx:factory="observableArrayList">
+                           <String fx:value="Nam" />
+                           <String fx:value="Nữ" />
+                           <String fx:value="Khác" />
+                        </FXCollections>
+                     </items>
+                  </ComboBox>
+               </children>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+               </rowConstraints>
+            </GridPane>
+            <GridPane hgap="20.0" vgap="15.0">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
+               </columnConstraints>
+               <children>
+                  <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Thông tin người giám hộ" />
+                  <Label text="Mối quan hệ với bệnh nhân:" GridPane.rowIndex="1" />
+                  <ComboBox fx:id="relationshipBox" promptText="Chọn mối quan hệ" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <items>
+                        <FXCollections fx:factory="observableArrayList">
+                           <String fx:value="Cha/Mẹ" />
+                           <String fx:value="Con" />
+                           <String fx:value="Vợ/Chồng" />
+                           <String fx:value="Anh/Chị/Em" />
+                           <String fx:value="Ông/Bà" />
+                           <String fx:value="Bạn bè" />
+                           <String fx:value="Khác" />
+                        </FXCollections>
+                     </items>
+                  </ComboBox>
+                  <Label text="Tên người giám hộ:" GridPane.rowIndex="2" />
+                  <TextField fx:id="guardNameField" promptText="Nhập tên người giám hộ" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label text="Số điện thoại người giám hộ:" GridPane.rowIndex="3" />
+                  <TextField fx:id="guardPhoneField" promptText="Nhập số điện thoại người giám hộ" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label text="Đặt ngày thăm khám:" GridPane.rowIndex="4" />
+                  <DatePicker fx:id="appointmentDateOther" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Label text="Đặt giờ thăm khám:" GridPane.rowIndex="5" />
+                  <ComboBox fx:id="appointmentTimeOther" promptText="Chọn giờ" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+               </children>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+               </rowConstraints>
+            </GridPane>
+            <HBox alignment="CENTER_RIGHT" spacing="10.0">
+               <children>
+                  <Button fx:id="backButtonOther" onAction="#handleBackAction" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-font-size: 14px;" text="Quay lại" />
+                  <Button fx:id="submitButtonOther" onAction="#handleSubmitOther" style="-fx-background-color: #3c83c6; -fx-font-size: 14px; -fx-background-radius: 10px;" text="Đặt lịch" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</VBox>

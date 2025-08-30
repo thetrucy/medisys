@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<StackPane fx:id="stackPane" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.medisys.controller.LoginAndRegisterController">
+   <children>
+      <VBox fx:id="registerBox" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="15.0">
+         <children>
+            <Label text="Đăng ký thông tin tài khoản" textFill="#1d3557">
+               <font>
+                  <Font name="System Bold" size="25.0" />
+               </font>
+            </Label>
+            <TextField fx:id="txtId" promptText="Số CCCD/CMND (9 hoặc 12 chữ số) (Ví dụ: 123456789)" />
+            <PasswordField fx:id="txtPass" promptText="Mật khẩu (Chứa ít nhất 8 ký tự, trong đó có cả số và chữ)" />
+            <TextField fx:id="txtUser" promptText="Họ và tên (Ví dụ: Nguyễn Văn An)" />
+            <TextField fx:id="txtPhone" promptText="Số điện thoại (Bắt đầu bằng 0 và có 10 chữ số) (Ví dụ: 0900100200)" />
+            <HBox alignment="CENTER" spacing="15.0">
+            <ComboBox fx:id="genderBoxRegister" prefWidth="150.0" promptText="Giới tính" />
+            <DatePicker fx:id="dobPickerRegister" promptText="Ngày sinh" />
+            </HBox>
+
+            <CheckBox fx:id="checkboxDoctor" mnemonicParsing="false" text="Tôi là bác sĩ" />
+            <Button fx:id="btnRegister" mnemonicParsing="false" onAction="#register" prefHeight="40.0" prefWidth="160.0" style="-fx-background-color: #1d3557; -fx-text-fill: white; -fx-font-weight: bold;" text="ĐĂNG KÝ" />
+         </children>
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </VBox>
+      <VBox fx:id="loginBox" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="15.0">
+         <children>
+            <Label text="Đăng Nhập" textFill="#1d3557">
+               <font>
+                  <Font name="System Bold" size="25.0" />
+               </font>
+            </Label>
+            <TextField fx:id="txtIdLogin" promptText="Số CCCD/CMND" />
+            <PasswordField fx:id="txtPassLogin" promptText="Mật khẩu" />
+            <Hyperlink onAction="#forgotPassword" style="-fx-font-weight: bold;" text="Tôi quên mật khẩu" />
+            <Button fx:id="btnLogin" mnemonicParsing="false" onAction="#login" prefHeight="40.0" prefWidth="160.0" style="-fx-background-color: #1d3557; -fx-text-fill: white;" text="ĐĂNG NHẬP" />
+         </children>
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </VBox>
+
+   </children>
+</StackPane>
