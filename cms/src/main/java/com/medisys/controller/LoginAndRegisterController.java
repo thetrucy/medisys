@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 
 import com.medisys.model.Patient;
 import com.medisys.model.User;
+import com.medisys.model.UserFactory;
 
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -109,8 +110,11 @@ public class LoginAndRegisterController {
             // Bác sĩ không cần giới tính, chỉ bệnh nhân mới cần
             if (checkboxDoctor.isSelected()) {
                 // Logic tạo tài khoản bác sĩ (nếu cần)
+                User user = UserFactory.createUser("doctor",id, password, fullName, phone);
+                // Hiện tại chưa hỗ trợ đăng ký bác sĩ
+                loginController.registerUser(user);
             } else {
-                User user = Patient.createForRegistration(id, password, fullName, phone, gender, dobString);
+                User user = UserFactory.createUser("patient",id, password, fullName, phone, gender, dobString);
                 loginController.registerUser(user);
             }
         } finally {
