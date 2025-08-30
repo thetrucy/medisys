@@ -24,7 +24,7 @@ public class Doctor extends User {
     }
 
     public Doctor(String doctor_id, String password, String name, String faculty,  String phone, String email, String room) {
-        super(doctor_id, password, name, phone, true); // Calls User(String nationalId, String name, String phone)
+        super(doctor_id, password, name, phone, true);// Calls User(String nationalId, String name, String phone)
         this.email = new SimpleStringProperty(email);
         this.faculty = new SimpleStringProperty(faculty);
         this.room = new SimpleStringProperty(room);

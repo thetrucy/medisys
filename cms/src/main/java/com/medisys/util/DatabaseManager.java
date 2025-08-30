@@ -4,6 +4,7 @@ package com.medisys.util;
 import com.medisys.model.Appointment;
 import com.medisys.model.Patient;
 import com.medisys.model.User;
+import com.medisys.model.UserFactory;
 import com.medisys.model.Doctor;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -227,7 +228,7 @@ public class DatabaseManager {
                 patient.getPassword(),
                 patient.getName(),
                 patient.getPhone(),
-                "false" // isDoctor = false for patients
+                patient.getUserType()
                 );
                 userWriter.write(userLine);
                 userWriter.newLine();
@@ -249,6 +250,7 @@ public class DatabaseManager {
         initialDoctors.add(new Doctor("079172222223","Dr. David Kim", "Orthopedics", "0923456789", "david.k@medisys.com", "Room 5"));
         initialDoctors.add(new Doctor("079171113222","Dr. Sarah Chen", "Internal Medicine", "0929876543", "sarah.c@medisys.com", "Room 6"));
 
+        
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_DOCTORS, true));
              BufferedWriter userWriter = new BufferedWriter(new FileWriter(DATA_USERS, true))) {
             for (Doctor doctor : initialDoctors) {
@@ -273,7 +275,7 @@ public class DatabaseManager {
                     "", // Password để trống cho bác sĩ (vì không có chức năng đăng nhập cho bác sĩ)
                     doctor.getName(),
                     doctor.getPhone(),
-                    "true" // isDoctor = true for doctors
+                    doctor.getUserType() // isDoctor = true for doctors
                 );
                 userWriter.write(userLine);
                 userWriter.newLine();

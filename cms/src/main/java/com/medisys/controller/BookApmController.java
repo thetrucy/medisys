@@ -501,13 +501,6 @@ public class BookApmController implements Initializable {
                     return; // Dừng lại ngay lập tức
                 }
 
-                // Create and save patient
-                Patient patient = Patient.createForOtherBooking(patientId, patientName, guardPhone, patientDob, patientGender);
-                patient.setGuard(relationship, guardName, guardPhone);
-                
-                // if (dbManager.getPatientByNationalID(patientId) == null) {
-                //     dbManager.addPatient(patient);
-                // }
                 // Kiểm tra xem bệnh nhân đã tồn tại chưa
                 Patient existingPatient = dbManager.getPatientByNationalID(patientId);
 
