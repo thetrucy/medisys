@@ -6,6 +6,7 @@ import com.medisys.util.DatabaseManager;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.LocalDate;
 
 import com.medisys.model.Patient;
 import com.medisys.model.User;
@@ -152,6 +153,13 @@ public class ProfileController {
         // --- Phone validation ---
         if (!newPhone.matches("^0\\d{9}$")) {
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Số điện thoại không hợp lệ. Phải bắt đầu bằng 0 và có 10 chữ số.");
+            return;
+        }
+        
+        // --- DOB validation ---
+        LocalDate selectedDob = dobPicker.getValue();
+        if (selectedDob != null && selectedDob.isAfter(LocalDate.now())) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Ngày sinh không được lớn hơn ngày hiện tại.");
             return;
         }
 
