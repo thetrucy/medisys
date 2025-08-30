@@ -173,7 +173,6 @@ public class ApmFirstController {
 	// below here are just buttons animation
 
     private void setActive(Button btn) {
-    	System.out.println("lmao on");
     	Timeline timeline = new Timeline(
     	        new KeyFrame(Duration.millis(100),
     	            e -> btn.setStyle("-fx-background-color: #3c83c6; -fx-text-fill: white; -fx-background-radius: 20px;"),
@@ -184,7 +183,6 @@ public class ApmFirstController {
     }
 
     private void setInactive(Button btn) {
-    	System.out.println("lmao off");
     	Timeline timeline = new Timeline(
     	        new KeyFrame(Duration.millis(100),
     	            e -> btn.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-background-radius: 20px;"),
