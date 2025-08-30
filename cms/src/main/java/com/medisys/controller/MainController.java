@@ -11,7 +11,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
 public class MainController {
 
@@ -25,12 +24,6 @@ public class MainController {
     public void loadAppointmentFirstView() throws Exception {
         loadView("AppointmentFirst.fxml");
     }
-
-    // public void loadBookingView() throws Exception {
-    //     loadView("BookAppointment.fxml");
-    // }
-
-    // REMOVED the old loadBookingView() method.
 
     public void loadBookingView(Doctor doctor) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/medisys/view/BookAppointment.fxml"));

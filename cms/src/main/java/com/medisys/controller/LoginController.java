@@ -5,10 +5,10 @@ import com.medisys.model.User;
 import com.medisys.util.CurrentUser;
 import com.medisys.util.DatabaseManager;
 
-import java.io.BufferedReader;
+// import java.io.BufferedReader;
 
-import java.io.File;
-import java.io.FileReader;
+// import java.io.File;
+// import java.io.FileReader;
 
 import java.io.IOException;
 import javafx.animation.KeyFrame;
@@ -159,7 +159,7 @@ public class LoginController {
     }
 
     private boolean isValidName(String fullName) {
-        return fullName.matches("^[\\p{L} .'-]+$");
+        return fullName.matches("^[\\p{L}\\s]+$");
     }
 
     private boolean isValidID(String id) {
@@ -175,22 +175,22 @@ public class LoginController {
         return password.length() >= 8 && password.matches(".*[A-Za-z].*") && password.matches(".*\\d.*");
     }
 
-    private boolean isDuplicateID(String id) {
-        File file = new File("users.txt");
-        if (!file.exists()) return false;
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length > 0 && parts[0].equals(id)) {
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
+    // private boolean isDuplicateID(String id) {
+    //     File file = new File("users.txt");
+    //     if (!file.exists()) return false;
+    //     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+    //         String line;
+    //         while ((line = reader.readLine()) != null) {
+    //             String[] parts = line.split(",");
+    //             if (parts.length > 0 && parts[0].equals(id)) {
+    //                 return true;
+    //             }
+    //         }
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //     }
+    //     return false;
+    // }
 
 
     private void navigateToHome() {

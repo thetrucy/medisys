@@ -430,7 +430,7 @@ public class BookApmController implements Initializable {
         }
     }
 
-    @SuppressWarnings("unused")
+    // @SuppressWarnings("unused")
 	@FXML
     private void handleSubmitSelf(ActionEvent event) {
         if (validateSelfBookingForm()) {
@@ -628,7 +628,7 @@ public class BookApmController implements Initializable {
             errors.append("- Họ và tên phải có ít nhất 2 ký tự\n");
         } else if (name.length() > 50) {
             errors.append("- Họ và tên không được vượt quá 50 ký tự\n");
-        } else if (!name.matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
+        } else if (!name.matches("^[\\p{L}\\s]+$")) {
             errors.append("- Họ và tên chỉ được chứa chữ cái và khoảng trắng\n");
         }
 
@@ -637,6 +637,13 @@ public class BookApmController implements Initializable {
             errors.append("- Vui lòng nhập ngày sinh bệnh nhân\n");
         } else if (!isValidDateFormat(dob)) {
             errors.append("- Ngày sinh bệnh nhân không đúng định dạng (dd/MM/yyyy) hoặc chưa đến ngày này\n");
+        } else { // <-- THÊM KHỐI ELSE NÀY
+            // Nếu định dạng đúng, kiểm tra xem ngày có hợp lệ không
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate birthDate = LocalDate.parse(dob, formatter);
+            if (birthDate.isAfter(LocalDate.now())) {
+                errors.append("- Ngày sinh không thể là một ngày trong tương lai\n");
+            }
         }
 
         // String patientPhone = patientPhoneField.getText().trim();
@@ -658,7 +665,7 @@ public class BookApmController implements Initializable {
         if (phoneG.isEmpty()) {
             errors.append("- Vui lòng nhập số điện thoại người giám hộ\n");
         } else if (!isValidPhoneNumber(phoneG)) {
-            errors.append("- Số điện thoại người giám hộ không hợp lệ (10-11 chữ số, bắt đầu bằng 0)\n");
+            errors.append("- Số điện thoại người giám hộ không hợp lệ (Phải bắt đầu bằng 0 và có 10 chữ số)\n");
         }
 
         String nameG = guardNameField.getText().trim();
@@ -668,7 +675,7 @@ public class BookApmController implements Initializable {
             errors.append("- Tên người giám hộ phải có ít nhất 2 ký tự\n");
         } else if (nameG.length() > 50) {
             errors.append("- Tên người giám hộ không được vượt quá 50 ký tự\n");
-        } else if (!nameG.matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
+        } else if (!nameG.matches("^[\\p{L}\\s]+$")) {
             errors.append("- Tên người giám hộ chỉ được chứa chữ cái và khoảng trắng\n");
         }
 
@@ -695,7 +702,7 @@ public class BookApmController implements Initializable {
     }
 
     private boolean isValidPhoneNumber(String phone) {
-        return phone.matches("^0\\d{9,10}$");
+        return phone.matches("^0\\d{9}$");
     }
 
     private boolean isValidDateFormat(String date) {
@@ -731,14 +738,14 @@ public class BookApmController implements Initializable {
     }
 
 
-    private void clearSelfForm() {
-        nameFieldSelf.clear();
-        dobFieldSelf.clear();
-        phoneFieldSelf.clear();
-        genderBoxSelf.setValue(null);
-        appointmentDateSelf.setValue(LocalDate.now());
-        appointmentTimeSelf.setValue(null);
-    }
+    // private void clearSelfForm() {
+    //     nameFieldSelf.clear();
+    //     dobFieldSelf.clear();
+    //     phoneFieldSelf.clear();
+    //     genderBoxSelf.setValue(null);
+    //     appointmentDateSelf.setValue(LocalDate.now());
+    //     appointmentTimeSelf.setValue(null);
+    // }
 
     private void clearOtherForm() {
         patientIdField.clear();

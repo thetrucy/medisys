@@ -48,64 +48,6 @@ public class UpcomingApmController implements Initializable {
     private ObservableList<UpcomingAppointment> masterData = FXCollections.observableArrayList();
 
     @Override
-    // public void initialize(URL location, ResourceBundle resources) {
-    //     DatabaseManager dbManager = DatabaseManager.getInstance();
-    //     dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
-    //     roomColumn.setCellValueFactory(new PropertyValueFactory<>("room"));
-    //     departmentColumn.setCellValueFactory(new PropertyValueFactory<>("department"));
-    //     doctorColumn.setCellValueFactory(new PropertyValueFactory<>("doctor"));
-    //     notesColumn.setCellValueFactory(new PropertyValueFactory<>("notes"));
-
-    //     // Defensive: get current user and check for null
-    //     String patientId = null;
-    //     if (CurrentUser.getInstance().getCurrentUser() != null) {
-    //         patientId = CurrentUser.getInstance().getCurrentUser().getId();
-    //     }
-    //     if (patientId == null) {
-    //         appointmentTable.setItems(FXCollections.observableArrayList());
-    //         return;
-    //     }
-
-    //     List<Appointment> appointments = dbManager.getAppointmentsByPatient(patientId);
-    //     ObservableList<Appointment> observableAppointments = FXCollections.observableArrayList(appointments);
-    //     observableAppointments.sort((a1, a2) -> a1.getAppointmentTime().compareTo(a2.getAppointmentTime()));
-
-    //     FilteredList<Appointment> filteredAppointments = new FilteredList<>(observableAppointments, p -> true);
-    //     FilterField.textProperty().addListener((observable, oldValue, newValue) -> {
-    //         String filter = newValue == null ? "" : newValue.toLowerCase();
-    //         filteredAppointments.setPredicate(apm -> {
-    //             if (filter.isEmpty()) {
-    //                 return true;
-    //             }
-    //             return (apm.getDoctorName() != null && apm.getDoctorName().toLowerCase().contains(filter)) ||
-    //                    (apm.getField() != null && apm.getField().toLowerCase().contains(filter));
-    //         });
-    //     });
-
-    //     ObservableList<UpcomingAppointment> upcomingList = FXCollections.observableArrayList();
-    //     for (Appointment apm : filteredAppointments) {
-    //         upcomingList.add(new UpcomingAppointment(
-    //             apm.getAppointmentTime() != null ? apm.getAppointmentTime().toString() : "",
-    //             apm.getRoom() != null ? apm.getRoom() : "",
-    //             apm.getField() != null ? apm.getField() : "",
-    //             apm.getDoctorName() != null ? apm.getDoctorName() : "",
-    //             "" // notes
-    //         ));
-    //     }
-    //     appointmentTable.setItems(upcomingList);
-
-    //     appointmentTable.setOnMouseClicked(event -> {
-    //         UpcomingAppointment selected = appointmentTable.getSelectionModel().getSelectedItem();
-    //         if (selected != null) {
-    //             System.out.println("Đã chọn lịch khám:");
-    //             System.out.println("Ngày: " + selected.getDate());
-    //             System.out.println("Khoa: " + selected.getDepartment());
-    //             System.out.println("Bác sĩ: " + selected.getDoctor());
-    //             System.out.println("Ghi chú: " + selected.getNotes());
-    //         }
-    //     });
-    // }
-
     public void initialize(URL location, ResourceBundle resources) {
         setupTableColumns();
         

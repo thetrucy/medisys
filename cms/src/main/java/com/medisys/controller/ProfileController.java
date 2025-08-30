@@ -16,7 +16,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 
 import javafx.util.Duration;
 import javafx.scene.control.Button;
@@ -29,18 +28,11 @@ public class ProfileController {
     private Patient currentPatient;
     private DatabaseManager dbManager;
 
-    // public void setDatabaseManager(DatabaseManager dbManager) {
-    //     this.dbManager = dbManager;
-    // }
-
     @FXML
     private TextField IDField, nameField, phoneField;
 
     @FXML
     private DatePicker dobPicker;
-
-    // @FXML
-    // private TextField emailField;
 
     @FXML
     private CheckBox femaleCheckbox, maleCheckbox;
@@ -57,18 +49,6 @@ public class ProfileController {
         dbManager = DatabaseManager.getInstance();
         User currentUser = CurrentUser.getInstance().getCurrentUser();
         
-        // if (currentUser != null && !currentUser.isDoctor()) { // only lookup if this is a patient
-        //     // for example by nationalId
-        //     Patient patient = dbManager.getPatientByNationalID(currentUser.getId());
-
-        //     if (patient != null) {
-        //         currentPatient = patient;
-        //         setPatient(currentPatient);
-        //         System.out.println("DOB: " + patient.getDOB());
-        //     } else {
-        //         System.err.println("Không tìm thấy bệnh nhân '" + currentUser.getName() + "' trong cơ sở dữ liệu.");
-        //     }
-        // }
         if (currentUser instanceof Patient) {
             this.currentPatient = (Patient) currentUser;
             populatePatientData();
@@ -159,9 +139,19 @@ public class ProfileController {
         String newPhone = phoneField.getText().trim();
         String newDob = dobPicker.getValue() != null ? dobPicker.getValue().toString() : "";
 
+        // --- Name validation ---
+        if (newName.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Họ tên không được để trống.");
+            return;
+        }
+        if (!isValidName(newName)) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Họ và tên không hợp lệ. Vui lòng chỉ sử dụng chữ cái và khoảng trắng.");
+            return;
+        }
+        
         // --- Phone validation ---
-        if (!newPhone.matches("\\d{10,11}")) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi", "Số điện thoại phải gồm 10 hoặc 11 chữ số.");
+        if (!newPhone.matches("^0\\d{9}$")) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Số điện thoại không hợp lệ. Phải bắt đầu bằng 0 và có 10 chữ số.");
             return;
         }
 
@@ -233,4 +223,9 @@ public class ProfileController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    private boolean isValidName(String fullName) {
+    // Regex này cho phép chữ cái (bao gồm cả tiếng Việt có dấu), khoảng trắng, và các ký tự .'-
+    return fullName.matches("^[\\p{L} .'-]+$");
+}
 }

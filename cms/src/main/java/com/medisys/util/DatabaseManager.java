@@ -5,7 +5,6 @@ import com.medisys.model.Appointment;
 import com.medisys.model.Patient;
 import com.medisys.model.User;
 import com.medisys.model.Doctor;
-import com.medisys.util.CurrentUser;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
