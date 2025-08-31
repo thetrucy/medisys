@@ -10,6 +10,5 @@ public class ButtonController {
 	    DropShadow shadow = new DropShadow();
 	    shadow.setColor(Color.DARKBLUE);
 	    button.setEffect(shadow);
-	 
     }
 }

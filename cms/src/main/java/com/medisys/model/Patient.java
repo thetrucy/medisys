@@ -1,6 +1,5 @@
 package com.medisys.model;
 
-
 public class Patient extends User{
     private String dob;
     private String gender; // ADDED

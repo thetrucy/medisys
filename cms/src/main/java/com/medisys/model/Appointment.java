@@ -5,9 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Appointment {
-    private int id; //appointment's id
-    // private Doctor doctor;
-    // private Patient patient;
+    private int id;
     private String doctorId;
     private String patientId;
     private String field;

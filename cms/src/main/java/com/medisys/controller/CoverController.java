@@ -6,7 +6,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
 public class CoverController {
-
     private LoginController loginController;
 
     @FXML

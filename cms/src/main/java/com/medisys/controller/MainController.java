@@ -1,10 +1,8 @@
 package com.medisys.controller;
 
 import java.io.IOException;
-
 import com.medisys.model.Doctor;
 import com.medisys.util.CurrentUser;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -13,7 +11,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 
 public class MainController {
-
     @FXML
     private StackPane contentArea;
 

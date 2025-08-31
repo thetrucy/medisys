@@ -1,36 +1,27 @@
 package com.medisys.controller;
 
 import com.medisys.model.ScheduleMaker;
-
 import com.medisys.model.Appointment;
 import com.medisys.model.Patient;
 import com.medisys.model.Doctor;
 import com.medisys.model.User;
 import com.medisys.util.CurrentUser;
-
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-
 import javafx.fxml.Initializable;
-
 import javafx.scene.control.*;
-//import javafx.scene.effect.BlurType;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-
 import javafx.util.Callback;
-
 import java.io.IOException;
 import java.net.URL;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-// import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
