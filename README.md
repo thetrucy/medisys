@@ -18,3 +18,8 @@ The application is designed to handle patient and doctor information, as well as
 
 * **Programming Language**: Java
 * **UI Framework**: JavaFX
+
+## How to run
+### With VSCode
+
+* Clone this repository, wait for resources to load, and run Main.java
