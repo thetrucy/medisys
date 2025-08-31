@@ -1,15 +1,8 @@
 package com.medisys.controller;
 
-
 import com.medisys.model.User;
 import com.medisys.util.CurrentUser;
 import com.medisys.util.DatabaseManager;
-
-// import java.io.BufferedReader;
-
-// import java.io.File;
-// import java.io.FileReader;
-
 import java.io.IOException;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -29,7 +22,6 @@ import javafx.util.Duration;
 import javafx.application.Platform;
 
 public class LoginController {
-
     @FXML
     private BorderPane borderPane;
     @FXML

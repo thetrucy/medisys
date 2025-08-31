@@ -1,4 +1,5 @@
 package com.medisys.model;
+
 import com.medisys.util.DatabaseManager;
 import java.util.ArrayList;
 import java.util.List;

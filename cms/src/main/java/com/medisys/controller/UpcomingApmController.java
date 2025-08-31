@@ -5,14 +5,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-
 import com.medisys.util.DatabaseManager; // Import DatabaseManager for database operations
 import com.medisys.util.CurrentUser;
 import com.medisys.model.Appointment;
 import com.medisys.model.Patient;
 import com.medisys.model.UpcomingAppointment;
 import com.medisys.model.User;
-
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
@@ -80,14 +78,23 @@ public class UpcomingApmController implements Initializable {
 
         for (Appointment apm : allRelatedAppointments) {
             String note = "";
-            // Nếu tên bệnh nhân trong lịch hẹn khác tên người đăng nhập, đó là lịch đặt hộ
-            if (!apm.getPatientName().equals(currentUser.getName())) {
+            Patient appointmentPatient = dbManager.getPatientByNationalID(apm.getPatientId());
+        
+            String currentPatientName = "";
+            if (appointmentPatient != null) {
+                currentPatientName = appointmentPatient.getName();
+            } else {
+                currentPatientName = apm.getPatientName();
+            }
+            
+            // So sánh ID của người dùng hiện tại với ID của bệnh nhân trong lịch hẹn
+            if (!currentUser.getId().equals(apm.getPatientId())) {
                 note = "Đặt hộ";
             }
             
             masterData.add(new UpcomingAppointment(
                 apm.getAppointmentTime() != null ? apm.getAppointmentTime().format(formatter) : "",
-                apm.getPatientName() != null ? apm.getPatientName() : "",
+                currentPatientName,
                 apm.getRoom() != null ? apm.getRoom() : "",
                 apm.getField() != null ? apm.getField() : "",
                 apm.getDoctorName() != null ? apm.getDoctorName() : "",

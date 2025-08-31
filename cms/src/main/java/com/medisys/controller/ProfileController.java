@@ -1,23 +1,16 @@
 package com.medisys.controller;
 
 import com.medisys.util.DatabaseManager;
-
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.LocalDate;
-
 import com.medisys.model.Patient;
 import com.medisys.model.User;
 import com.medisys.util.CurrentUser;
-
 import javafx.animation.ScaleTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-
 import javafx.scene.control.Alert;
-
 import javafx.util.Duration;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;

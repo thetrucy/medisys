@@ -1,10 +1,8 @@
 package com.medisys.util;
 
-
 import com.medisys.model.Appointment;
 import com.medisys.model.Patient;
 import com.medisys.model.User;
-import com.medisys.model.UserFactory;
 import com.medisys.model.Doctor;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,17 +19,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DatabaseManager {
 
     private static DatabaseManager instance;
-
-    // private static final String APP_DATA_FOLDER_NAME = ".medisys"; // Thư mục ẩn để lưu data
-    // private static final String USER_HOME = System.getProperty("user.home");
-    // private static final String DATA_DIR = USER_HOME + File.separator + APP_DATA_FOLDER_NAME;
     private static final String DATA_DIR = "data";
     private static final String DATA_USERS = DATA_DIR + "/user.txt";
     private static final String DATA_PATIENTS = DATA_DIR + "/patient.txt";
     private static final String DATA_DOCTORS = DATA_DIR + "/doctor.txt";
     private static final String DATA_APPOINTMENTS = DATA_DIR + "/appointment.txt";
     private static final String DATA_ID_COUNTER = DATA_DIR + "/id_counter.txt";
-
     private static final String DELIMITER = "|";
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -243,13 +236,71 @@ public class DatabaseManager {
     private void populateInitialDoctorsToFile() {
         List<Doctor> initialDoctors = new ArrayList<>();
         // Use your Doctor constructor: (doctor_id, name, faculty, phone, email, room)
-        initialDoctors.add(new Doctor("079111111111","Dr. John Smith", "General Practice", "0901234567", "john.smith@medisys.com", "Room 1"));
-        initialDoctors.add(new Doctor("079171111222","Dr. Jane Doe", "Pediatrics", "0907654321", "jane.doe@medisys.com", "Room 2"));
-        initialDoctors.add(new Doctor("079171111333","Dr. Robert Johnson", "Cardiology", "0912345678", "robert.j@medisys.com", "Room 3"));
-        initialDoctors.add(new Doctor("079172222111","Dr. Mary Lee", "Dermatology", "0918765432", "mary.l@medisys.com", "Room 4"));
-        initialDoctors.add(new Doctor("079172222223","Dr. David Kim", "Orthopedics", "0923456789", "david.k@medisys.com", "Room 5"));
-        initialDoctors.add(new Doctor("079171113222","Dr. Sarah Chen", "Internal Medicine", "0929876543", "sarah.c@medisys.com", "Room 6"));
+        initialDoctors.add(new Doctor("079111111111","BS. Nguyễn Văn An", "Nội tổng quát", "0901000001", "nguyenvanan@medisys.com", "Phòng 1"));
+        initialDoctors.add(new Doctor("079111111222","BS. Trần Thị Bình", "Nhi", "0901000002", "tranthibinh@medisys.com", "Phòng 2"));
+        initialDoctors.add(new Doctor("079111111333","BS. Lê Văn Cường", "Tim mạch", "0901000003", "levancuong@medisys.com", "Phòng 3"));
+        initialDoctors.add(new Doctor("079111111444","BS. Phạm Thị Dung", "Da liễu", "0901000004", "phamthidung@medisys.com", "Phòng 4"));
+        initialDoctors.add(new Doctor("079111111555","BS. Hoàng Văn Đức", "Ngoại tổng quát", "0901000005", "hoangvanduc@medisys.com", "Phòng 5"));
+        initialDoctors.add(new Doctor("079111111666","BS. Võ Thị Hoa", "Tai mũi họng", "0901000006", "vothihoa@medisys.com", "Phòng 6"));
+        initialDoctors.add(new Doctor("079111111777","BS. Bùi Minh Hùng", "Mắt", "0901000007", "buiminhhung@medisys.com", "Phòng 7"));
+        initialDoctors.add(new Doctor("079111111888","BS. Đặng Thị Lan", "Răng hàm mặt", "0901000008", "dangthilan@medisys.com", "Phòng 8"));
+        initialDoctors.add(new Doctor("079111111999","BS. Ngô Văn Lâm", "Sản phụ khoa", "0901000009", "ngovanlam@medisys.com", "Phòng 9"));
+        initialDoctors.add(new Doctor("079111112000","BS. Đỗ Thị Mai", "Thần kinh", "0901000010", "dothimai@medisys.com", "Phòng 10"));
 
+        initialDoctors.add(new Doctor("079111112001","BS. Nguyễn Văn Nam", "Hô hấp", "0901000011", "nguyenvannam@medisys.com", "Phòng 11"));
+        initialDoctors.add(new Doctor("079111112002","BS. Trần Thị Oanh", "Tiêu hóa", "0901000012", "tranthioanh@medisys.com", "Phòng 12"));
+        initialDoctors.add(new Doctor("079111112003","BS. Lê Văn Phú", "Hồi sức cấp cứu", "0901000013", "levanphu@medisys.com", "Phòng 13"));
+        initialDoctors.add(new Doctor("079111112004","BS. Phạm Thị Quỳnh", "Ung bướu", "0901000014", "phamthiquynh@medisys.com", "Phòng 14"));
+        initialDoctors.add(new Doctor("079111112005","BS. Hoàng Văn Sơn", "Thận tiết niệu", "0901000015", "hoangvanson@medisys.com", "Phòng 15"));
+        initialDoctors.add(new Doctor("079111112006","BS. Võ Thị Tâm", "Cơ xương khớp", "0901000016", "vothitam@medisys.com", "Phòng 16"));
+        initialDoctors.add(new Doctor("079111112007","BS. Bùi Minh Toàn", "Huyết học", "0901000017", "buiminhtoan@medisys.com", "Phòng 17"));
+        initialDoctors.add(new Doctor("079111112008","BS. Đặng Thị Uyên", "Nội tiết", "0901000018", "dangthiuyen@medisys.com", "Phòng 18"));
+        initialDoctors.add(new Doctor("079111112009","BS. Ngô Văn Vinh", "Truyền nhiễm", "0901000019", "ngovanvinh@medisys.com", "Phòng 19"));
+        initialDoctors.add(new Doctor("079111112010","BS. Đỗ Thị Xuân", "Phục hồi chức năng", "0901000020", "dothixuan@medisys.com", "Phòng 20"));
+
+        initialDoctors.add(new Doctor("079111112011","BS. Nguyễn Văn Bảo", "Nội tổng quát", "0901000021", "nguyenvanbao@medisys.com", "Phòng 21"));
+        initialDoctors.add(new Doctor("079111112012","BS. Trần Thị Cẩm", "Nhi", "0901000022", "tranthicam@medisys.com", "Phòng 22"));
+        initialDoctors.add(new Doctor("079111112013","BS. Lê Văn Dũng", "Tim mạch", "0901000023", "levandung@medisys.com", "Phòng 23"));
+        initialDoctors.add(new Doctor("079111112014","BS. Phạm Thị Hạnh", "Da liễu", "0901000024", "phamthihanh@medisys.com", "Phòng 24"));
+        initialDoctors.add(new Doctor("079111112015","BS. Hoàng Văn Khánh", "Ngoại tổng quát", "0901000025", "hoangvankhanh@medisys.com", "Phòng 25"));
+        initialDoctors.add(new Doctor("079111112016","BS. Võ Thị Liên", "Tai mũi họng", "0901000026", "vothilien@medisys.com", "Phòng 26"));
+        initialDoctors.add(new Doctor("079111112017","BS. Bùi Minh Mạnh", "Mắt", "0901000027", "buiminhmanh@medisys.com", "Phòng 27"));
+        initialDoctors.add(new Doctor("079111112018","BS. Đặng Thị Ngọc", "Răng hàm mặt", "0901000028", "dangthingoc@medisys.com", "Phòng 28"));
+        initialDoctors.add(new Doctor("079111112019","BS. Ngô Văn Phát", "Sản phụ khoa", "0901000029", "ngovanphat@medisys.com", "Phòng 29"));
+        initialDoctors.add(new Doctor("079111112020","BS. Đỗ Thị Quang", "Thần kinh", "0901000030", "dothiquang@medisys.com", "Phòng 30"));
+
+        initialDoctors.add(new Doctor("079111112021","BS. Nguyễn Văn Sơn", "Hô hấp", "0901000031", "nguyenvanson@medisys.com", "Phòng 31"));
+        initialDoctors.add(new Doctor("079111112022","BS. Trần Thị Thu", "Tiêu hóa", "0901000032", "tranthithu@medisys.com", "Phòng 32"));
+        initialDoctors.add(new Doctor("079111112023","BS. Lê Văn Việt", "Hồi sức cấp cứu", "0901000033", "levanviet@medisys.com", "Phòng 33"));
+        initialDoctors.add(new Doctor("079111112024","BS. Phạm Thị Xuân", "Ung bướu", "0901000034", "phamthixuan@medisys.com", "Phòng 34"));
+        initialDoctors.add(new Doctor("079111112025","BS. Hoàng Văn Yên", "Thận tiết niệu", "0901000035", "hoangvanyen@medisys.com", "Phòng 35"));
+        initialDoctors.add(new Doctor("079111112026","BS. Võ Thị Ánh", "Cơ xương khớp", "0901000036", "vothianh@medisys.com", "Phòng 36"));
+        initialDoctors.add(new Doctor("079111112027","BS. Bùi Minh Bách", "Huyết học", "0901000037", "buiminhbach@medisys.com", "Phòng 37"));
+        initialDoctors.add(new Doctor("079111112028","BS. Đặng Thị Chi", "Nội tiết", "0901000038", "dangthichi@medisys.com", "Phòng 38"));
+        initialDoctors.add(new Doctor("079111112029","BS. Ngô Văn Diệu", "Truyền nhiễm", "0901000039", "ngovandieu@medisys.com", "Phòng 39"));
+        initialDoctors.add(new Doctor("079111112030","BS. Đỗ Thị Em", "Phục hồi chức năng", "0901000040", "dothiem@medisys.com", "Phòng 40"));
+
+        initialDoctors.add(new Doctor("079111112031","BS. Nguyễn Văn Giang", "Nội tổng quát", "0901000041", "nguyenvangiang@medisys.com", "Phòng 41"));
+        initialDoctors.add(new Doctor("079111112032","BS. Trần Thị Hòa", "Nhi", "0901000042", "tranthihoa@medisys.com", "Phòng 42"));
+        initialDoctors.add(new Doctor("079111112033","BS. Lê Văn Kiên", "Tim mạch", "0901000043", "levankien@medisys.com", "Phòng 43"));
+        initialDoctors.add(new Doctor("079111112034","BS. Phạm Thị Loan", "Da liễu", "0901000044", "phamthiloan@medisys.com", "Phòng 44"));
+        initialDoctors.add(new Doctor("079111112035","BS. Hoàng Văn Minh", "Ngoại tổng quát", "0901000045", "hoangvanminh@medisys.com", "Phòng 45"));
+        initialDoctors.add(new Doctor("079111112036","BS. Võ Thị Ngân", "Tai mũi họng", "0901000046", "vothingan@medisys.com", "Phòng 46"));
+        initialDoctors.add(new Doctor("079111112037","BS. Bùi Minh Nhật", "Mắt", "0901000047", "buiminhnhat@medisys.com", "Phòng 47"));
+        initialDoctors.add(new Doctor("079111112038","BS. Đặng Thị Oanh", "Răng hàm mặt", "0901000048", "dangthioanh@medisys.com", "Phòng 48"));
+        initialDoctors.add(new Doctor("079111112039","BS. Ngô Văn Quang", "Sản phụ khoa", "0901000049", "ngovanquang@medisys.com", "Phòng 49"));
+        initialDoctors.add(new Doctor("079111112040","BS. Đỗ Thị Phượng", "Thần kinh", "0901000050", "dothiphuong@medisys.com", "Phòng 50"));
+
+        initialDoctors.add(new Doctor("079111112041","BS. Nguyễn Văn Sang", "Hô hấp", "0901000051", "nguyenvansang@medisys.com", "Phòng 51"));
+        initialDoctors.add(new Doctor("079111112042","BS. Trần Thị Quỳnh", "Tiêu hóa", "0901000052", "tranthiquynh@medisys.com", "Phòng 52"));
+        initialDoctors.add(new Doctor("079111112043","BS. Lê Văn Tài", "Hồi sức cấp cứu", "0901000053", "levantai@medisys.com", "Phòng 53"));
+        initialDoctors.add(new Doctor("079111112044","BS. Phạm Thị Uyên", "Ung bướu", "0901000054", "phamthiuyen@medisys.com", "Phòng 54"));
+        initialDoctors.add(new Doctor("079111112045","BS. Hoàng Văn Vũ", "Thận tiết niệu", "0901000055", "hoangvanvu@medisys.com", "Phòng 55"));
+        initialDoctors.add(new Doctor("079111112046","BS. Võ Thị Xuân", "Cơ xương khớp", "0901000056", "vothixuan@medisys.com", "Phòng 56"));
+        initialDoctors.add(new Doctor("079111112047","BS. Bùi Minh Yến", "Huyết học", "0901000057", "buiminhyen@medisys.com", "Phòng 57"));
+        initialDoctors.add(new Doctor("079111112048","BS. Đặng Thị Ánh", "Nội tiết", "0901000058", "dangthianh@medisys.com", "Phòng 58"));
+        initialDoctors.add(new Doctor("079111112049","BS. Ngô Văn Bình", "Truyền nhiễm", "0901000059", "ngovanbinh@medisys.com", "Phòng 59"));
+        initialDoctors.add(new Doctor("079111112050","BS. Đỗ Thị Cúc", "Phục hồi chức năng", "0901000060", "dothicuc@medisys.com", "Phòng 60"));
         
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_DOCTORS, true));
              BufferedWriter userWriter = new BufferedWriter(new FileWriter(DATA_USERS, true))) {
@@ -1098,10 +1149,61 @@ public class DatabaseManager {
                 writer.write(line);
                 writer.newLine(); // <-- Luôn thêm ký tự xuống dòng sau mỗi dòng
             }
+            // Sau khi cập nhật patient.txt thành công, hãy cập nhật luôn user.txt
+            boolean userRecordUpdated = updateUserRecord(patient);
+            if (!userRecordUpdated) {
+                System.err.println("CẢNH BÁO: Đã cập nhật patient.txt nhưng user.txt thất bại. Dữ liệu không nhất quán!");
+            }
             System.out.println("Patient ID " + patient.getId() + " updated successfully.");
             return true;
         } catch (IOException e) {
             System.err.println("Error writing updated patients file: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean updateUserRecord(User userToUpdate) {
+        List<String> lines = new ArrayList<>();
+        boolean userFound = false;
+
+        // Đọc file user.txt
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_USERS))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + DELIMITER, -1);
+                // So sánh bằng nationalId (CCCD/CMND) vì nó là duy nhất
+                if (parts.length > 1 && parts[1].trim().equals(userToUpdate.getId())) {
+                    // Tạo dòng mới với thông tin đã cập nhật (tên, SĐT)
+                    String updatedLine = String.join(DELIMITER,
+                        parts[0], // dbId
+                        parts[1], // nationalId
+                        parts[2], // password
+                        userToUpdate.getName(),  // <-- Tên mới
+                        userToUpdate.getPhone(), // <-- SĐT mới
+                        parts[5]  // isDoctor
+                    );
+                    lines.add(updatedLine);
+                    userFound = true;
+                } else {
+                    lines.add(line);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Lỗi khi đọc file user.txt để cập nhật: " + e.getMessage());
+            return false;
+        }
+
+        if (!userFound) return false; // Không tìm thấy user để cập nhật
+
+        // Ghi lại toàn bộ file user.txt
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_USERS))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
+            return true;
+        } catch (IOException e) {
+            System.err.println("Lỗi khi ghi lại file user.txt sau khi cập nhật: " + e.getMessage());
             return false;
         }
     }
